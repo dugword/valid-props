@@ -1,0 +1,24 @@
+{
+  "name": "valid-props",
+  "version": "0.0.1",
+  "description": "Validates an objects properties",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"TODO: Not yet implemented\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dugword/valid-props.git"
+  },
+  "keywords": [
+    "valid",
+    "validator",
+    "validation"
+  ],
+  "author": "Douglas L. Jenkins",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dugword/valid-props/issues"
+  },
+  "homepage": "https://github.com/dugword/valid-props"
+}
