@@ -25,6 +25,9 @@ var checkPropertiesTypes = function (params, schema) {
         var type = schema[requiredProperty],
             value = params[requiredProperty];
 
+        // Don't check types on missing properties
+        if (!value) return;
+
         if (type === 'date' && new Date(type).toString() === 'Invalid Date') {
             return incorrectTypes.push(requiredProperty);
         }
@@ -49,7 +52,7 @@ self.setVerbose = function (flag) {
 
 self.validate = function (params, schema) {
 
-    var optional = schema.optional;
+    var optional = schema.optional || {};
     delete schema.optional;
 
     // Check that every required property exists
@@ -64,7 +67,7 @@ self.validate = function (params, schema) {
     var incorrectTypes = checkPropertiesTypes(params, schema);
 
     if (incorrectTypes.length) {
-        if (verbose) console.error('Incorrect types:' + incorrectTypes.join(', '));
+        if (verbose) console.error('Incorrect required type:', incorrectTypes.join(', '));
         return false;
     }
 
@@ -72,9 +75,10 @@ self.validate = function (params, schema) {
     incorrectTypes = checkPropertiesTypes(params, optional);
 
     if (incorrectTypes.length) {
-        if (verbose) console.error('Incorrect types:' + incorrectTypes.join(', '));
+        if (verbose) console.error('Incorrect optional type:', incorrectTypes.join(', '));
         return false;
     }
+
 
     // Strip params of unspecified properties
 
