@@ -10,7 +10,9 @@ self.validate = function (params, schema) {
 	var missingProperties = [];
 
 	Object.keys(schema).forEach(function (requiredProperty) {
-		if (!params[requiredProperty]) return missingProperties.push(requiredProperty);
+		if (!params[requiredProperty]) {
+			return missingProperties.push(requiredProperty);
+		}
 	});
 
 	if (missingProperties.length) {
@@ -22,6 +24,32 @@ self.validate = function (params, schema) {
 	var incorrectTypes = [];
 
 	Object.keys(schema).forEach(function (requiredProperty) {
-		// if(typeof params[requiredProperty] !== 
-	})
+		var type = schema[requiredProperty];
+
+		if (type === 'date') {
+
+		}	
+
+		else if (type === 'array') {
+
+		}
+
+		else if (type === ) {
+
+		}
+
+		else if(typeof params[requiredProperty] !== schema[requiredProperty]) {
+			return incorrectType.push((requiredProperty);
+		}
+	});
+
+	// Strip params of unspecified properties
+	
+	cleanParams = {};
+
+	Object.keys(schema).forEach(function (requiredProperty) {
+		cleanParams[requiredProperty] = params[requiredProperty];
+	});
+
+	return cleanParams;
 };
