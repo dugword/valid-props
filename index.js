@@ -30,27 +30,27 @@ var checkPropertiesTypes = function (params, schema) {
 
         if (requiredType === 'date') {
             if (new Date(value).toString() === 'Invalid Date') {
-                return incorrectTypes.push(requiredProperty);
+                return incorrectTypes.push(requiredProperty + ' not a valid date');
             }
         }
 
         else if (requiredType === 'array') {
             if (!Array.isArray(value)) {
-                return incorrectTypes.push(requiredProperty);
+                return incorrectTypes.push(requiredProperty + ' not an array');
             }
         }
 
         else if (requiredType === 'number') {
             value = Number(value);
             if (isNaN(value)) {
-                return incorrectTypes.push(requiredProperty);
+                return incorrectTypes.push(requiredProperty + ' not a number');
             }
             params[requiredProperty] = value;
         }
 
         else {
             if (typeof params[requiredProperty] !== schema[requiredProperty]) {
-                return incorrectTypes.push(requiredProperty);
+                return incorrectTypes.push(requiredProperty + ' not a ' + requiredType);
             }
         }
 
@@ -75,10 +75,9 @@ self.validate = function (params, schema) {
     var missingProperties = checkForMissingProperties(params, schema);
 
     if (missingProperties.length) {
-        if (verbose) console.error('Missing properties:' + missingProperties.join(', '));
+        if (verbose) console.error('Missing properties:',  missingProperties.join(', '));
         return false;
     }
-
 
     // Check that every required property is of the required type
     var incorrectTypes = checkPropertiesTypes(params, schema);
