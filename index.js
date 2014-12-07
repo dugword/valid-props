@@ -22,21 +22,25 @@ var checkPropertiesTypes = function (params, schema) {
     var incorrectTypes = [];
 
     Object.keys(schema).forEach(function (requiredProperty) {
-        var type = schema[requiredProperty],
+        var requiredType = schema[requiredProperty],
             value = params[requiredProperty];
 
         // Don't check types on missing properties
         if (!value) return;
 
-        if (type === 'date' && new Date(type).toString() === 'Invalid Date') {
-            return incorrectTypes.push(requiredProperty);
+        if (requiredType === 'date') {
+            if (new Date(value).toString() === 'Invalid Date') {
+                return incorrectTypes.push(requiredProperty);
+            }
         }
 
-        else if (type === 'array' && !Array.isArray(type)) {
-            return incorrectTypes.push(requiredProperty);
+        else if (requiredType === 'array') {
+            if (!Array.isArray(value)) {
+                return incorrectTypes.push(requiredProperty);
+            }
         }
 
-        else if (type === 'number') {
+        else if (requiredType === 'number') {
             value = Number(value);
             if (isNaN(value)) {
                 return incorrectTypes.push(requiredProperty);
@@ -44,9 +48,12 @@ var checkPropertiesTypes = function (params, schema) {
             params[requiredProperty] = value;
         }
 
-        else if (typeof params[requiredProperty] !== schema[requiredProperty]) {
-            return incorrectTypes.push(requiredProperty);
+        else {
+            if (typeof params[requiredProperty] !== schema[requiredProperty]) {
+                return incorrectTypes.push(requiredProperty);
+            }
         }
+
     });
 
     return incorrectTypes;
