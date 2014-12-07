@@ -36,6 +36,14 @@ var checkPropertiesTypes = function (params, schema) {
             return incorrectTypes.push(requiredProperty);
         }
 
+        else if (type === 'number') {
+            value = Number(value);
+            if (isNaN(value)) {
+                return incorrectTypes.push(requiredProperty);
+            }
+            params[requiredProperty] = value;
+        }
+
         else if (typeof params[requiredProperty] !== schema[requiredProperty]) {
             return incorrectTypes.push(requiredProperty);
         }
@@ -55,6 +63,7 @@ self.validate = function (params, schema) {
     var optional = schema.optional || {};
     delete schema.optional;
 
+
     // Check that every required property exists
     var missingProperties = checkForMissingProperties(params, schema);
 
@@ -63,6 +72,7 @@ self.validate = function (params, schema) {
         return false;
     }
 
+
     // Check that every required property is of the required type
     var incorrectTypes = checkPropertiesTypes(params, schema);
 
@@ -70,6 +80,7 @@ self.validate = function (params, schema) {
         if (verbose) console.error('Incorrect required type:', incorrectTypes.join(', '));
         return false;
     }
+
 
     // Check that every optional request is of the required type
     incorrectTypes = checkPropertiesTypes(params, optional);
@@ -93,6 +104,7 @@ self.validate = function (params, schema) {
             cleanParams[optionalProperty] = params[optionalProperty];
         }
     });
+
 
     return cleanParams;
 };
