@@ -29,9 +29,11 @@ var checkPropertiesTypes = function (params, schema) {
         if (!value) return;
 
         if (requiredType === 'date') {
-            if (new Date(value).toString() === 'Invalid Date') {
+            value = new Date(value);
+            if (value.toString() === 'Invalid Date') {
                 return incorrectTypes.push(requiredProperty + ' not a valid date');
             }
+            params[requiredProperty] = value;
         }
 
         else if (requiredType === 'array') {
