@@ -20,5 +20,12 @@
   "bugs": {
     "url": "https://github.com/dugword/valid-props/issues"
   },
-  "homepage": "https://github.com/dugword/valid-props"
+  "homepage": "https://github.com/dugword/valid-props",
+  "devDependencies": {
+    "mocha": "^2.1.0"
+  },
+  "dependencies": {
+    "chai": "^1.10.0",
+    "mocha": "^2.1.0"
+  }
 }

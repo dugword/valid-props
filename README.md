@@ -43,6 +43,14 @@ NOTE: The validate method will do type coercion and return the specified type in
         res.send('success')
     }
 
+# TYPES
+string
+number
+array
+  typed array
+object
+boolean
+
 # BUGS AND LIMITATIONS
 Optional object parameters are declared in a property named "optional" preventing "optional" from being an available property.
 
