@@ -1,10 +1,10 @@
 {
   "name": "valid-props",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Validates an objects properties",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"TODO: Not yet implemented\""
+    "test": "node_modules/mocha/bin/mocha test"
   },
   "repository": {
     "type": "git",
