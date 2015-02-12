@@ -50,6 +50,14 @@ var checkPropertiesTypes = function (params, schema) {
             params[requiredProperty] = value;
         }
 
+        else if (requiredType === 'boolean') {
+            if (value.toLowerCase() === 'false') {
+                value = false;
+            }
+            else value = Boolean(value);
+            params[requiredProperty] = value;
+        }
+
         else {
             if (typeof params[requiredProperty] !== schema[requiredProperty]) {
                 return incorrectTypes.push(requiredProperty + ' not a ' + requiredType);
@@ -108,7 +116,7 @@ self.validate = function (params, schema) {
     });
 
     Object.keys(optional).forEach(function (optionalProperty) {
-        if (params[optionalProperty]) {
+        if (params[optionalProperty] !== undefined) {
             cleanParams[optionalProperty] = params[optionalProperty];
         }
     });
