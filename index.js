@@ -171,7 +171,7 @@ self.validate = function(params, schema, optional) {
     // Check that every optional request is of the required type
     cleanOptionalParams = checkPropertiesTypes(params, optional);
     var incorrectOptionalTypes = Object.keys(cleanOptionalParams).filter(function (key) {
-        return (optionalParams[key] === null);
+        return (cleanOptionalParams[key] === null);
     });
     if (incorrectOptionalTypes.length) {
         if (verbose) {
