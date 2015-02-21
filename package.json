@@ -1,10 +1,10 @@
 {
   "name": "valid-props",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Validates an objects properties",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"TODO: Not yet implemented\""
+    "test": "node_modules/mocha/bin/mocha test"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,12 @@
   "bugs": {
     "url": "https://github.com/dugword/valid-props/issues"
   },
-  "homepage": "https://github.com/dugword/valid-props"
+  "homepage": "https://github.com/dugword/valid-props",
+  "devDependencies": {
+    "mocha": "^2.1.0"
+  },
+  "dependencies": {
+    "chai": "^1.10.0",
+    "mocha": "^2.1.0"
+  }
 }

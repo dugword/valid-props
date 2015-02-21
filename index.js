@@ -2,125 +2,189 @@
 
 var self = module.exports;
 
-var verbose = true;
+var verbose = false;
 
-// Private Methods
+var arrayRegex = /\[(string|number|boolean|date|object|array)]/;
 
-var checkForMissingProperties = function (params, schema) {
-    var missingProperties = [];
+var checker = {};
 
-    Object.keys(schema).forEach(function (requiredProperty) {
-        if (!params[requiredProperty]) {
-            return missingProperties.push(requiredProperty);
-        }
-    });
-
-    return missingProperties;
+// Casts value as string,
+// this will always be valid unless the string is empty
+checker.string = function(value) {
+    // TODO (Doug): This may not capture everything we want
+    if (!value) {
+        return null;
+    }
+    return value.toString();
 };
 
-var checkPropertiesTypes = function (params, schema) {
-    var incorrectTypes = [];
+checker.number = function(value) {
+    value = parseFloat(value);
 
-    Object.keys(schema).forEach(function (requiredProperty) {
+    if (isNaN(value)) {
+        return null;
+    }
+
+    return value;
+};
+
+checker.date = function(value) {
+    value = new Date(value);
+
+    if (value.toString() === 'Invalid Date') {
+        return null;
+    }
+
+    return value;
+};
+
+checker.array = function(value) {
+    if (!Array.isArray(value)) {
+        return null;
+    }
+
+    return value;
+};
+
+// TODO (Doug): I'm sure this isn't working right
+checker.typedArray = function(value, type) {
+    var cleanArray = [];
+    if (!Array.isArray(value)) {
+        return null;
+    }
+
+    value.forEach(function (item) {
+        cleanArray.push(checker[type](item));
+    });
+
+    var incorrectValues = cleanArray.filter(function(item) {
+        return (item === null);
+    });
+
+    if (incorrectValues.length) {
+        return null;
+    }
+
+    return cleanArray;
+};
+
+// TODO (Doug): This needs some work
+checker.object = function(value) {
+    if (typeof value !== 'object') {
+        return null;
+    }
+
+    return value;
+};
+
+// TODO (Doug): May want to re-evaluate this
+checker.boolean = function(value) {
+    if (value === undefined || value === null) {
+        return null;
+    }
+
+    if (typeof value === 'boolean') {
+        return value;
+    }
+
+    if (value === 1 || value === '1') {
+        return true;
+    }
+
+    if (value === 0 || value === '0') {
+        return false;
+    }
+
+    if (/^true$/i.test(value)) {
+        return true;
+    }
+
+    if (/^false$/i.test(value)) {
+        return false;
+    }
+
+    return null;
+};
+
+
+// Sets all properties to their clean value or null
+var checkPropertiesTypes = function(params, schema) {
+    var cleanParams = {};
+
+    Object.keys(schema).forEach(function(requiredProperty) {
         var requiredType = schema[requiredProperty],
             value = params[requiredProperty];
 
-        // Don't check types on missing properties
-        if (!value) return;
-
-        if (requiredType === 'date') {
-            value = new Date(value);
-            if (value.toString() === 'Invalid Date') {
-                return incorrectTypes.push(requiredProperty + ' not a valid date');
-            }
-            params[requiredProperty] = value;
+        if (arrayRegex.test(requiredType)) {
+            var arrayType = arrayRegex.exec(requiredType)[1];
+            cleanParams[requiredProperty] = checker.typedArray(value, arrayType);
+            return;
         }
 
-        else if (requiredType === 'array') {
-            if (!Array.isArray(value)) {
-                return incorrectTypes.push(requiredProperty + ' not an array');
-            }
-        }
-
-        else if (requiredType === 'number') {
-            value = Number(value);
-            if (isNaN(value)) {
-                return incorrectTypes.push(requiredProperty + ' not a number');
-            }
-            params[requiredProperty] = value;
-        }
-
-        else if (requiredType === 'boolean') {
-            if (value.toLowerCase() === 'false') {
-                value = false;
-            }
-            else value = Boolean(value);
-            params[requiredProperty] = value;
-        }
-
-        else {
-            if (typeof params[requiredProperty] !== schema[requiredProperty]) {
-                return incorrectTypes.push(requiredProperty + ' not a ' + requiredType);
-            }
-        }
-
+        cleanParams[requiredProperty] = checker[requiredType](value);
     });
 
-    return incorrectTypes;
+    return cleanParams;
 };
 
 // Public Methods
 
-self.setVerbose = function (flag) {
-    if (flag) verbose = true;
+self.setVerbose = function(flag) {
+    if (flag === undefined) return verbose = true;
+    if (flag) return verbose = true;
+    verbose = false;
 };
 
-self.validate = function (params, schema) {
+self.validate = function(params, schema, optional) {
+    var cleanParams = {},
+        cleanOptionalParams = {};
 
-    var optional = schema.optional || {};
-    delete schema.optional;
-
+    optional = optional || {};
 
     // Check that every required property exists
-    var missingProperties = checkForMissingProperties(params, schema);
+    var missingProperties = Object.keys(schema).filter(function(key) {
+        return (!params.hasOwnProperty([key]));
+    });
 
     if (missingProperties.length) {
-        if (verbose) console.error('Missing properties:',  missingProperties.join(', '));
-        return false;
+        if (verbose) {
+            console.error('Missing properties:', missingProperties.join(', '));
+        }
+
+        return null;
     }
 
     // Check that every required property is of the required type
-    var incorrectTypes = checkPropertiesTypes(params, schema);
-
+    cleanParams = checkPropertiesTypes(params, schema);
+    var incorrectTypes = Object.keys(cleanParams).filter(function (key) {
+        return (cleanParams[key] === null);
+    });
     if (incorrectTypes.length) {
-        if (verbose) console.error('Incorrect required type:', incorrectTypes.join(', '));
-        return false;
+        if (verbose) {
+            console.error('Incorrect required type:', incorrectTypes.join(', '));
+        }
+
+        return null;
     }
 
 
     // Check that every optional request is of the required type
-    incorrectTypes = checkPropertiesTypes(params, optional);
+    cleanOptionalParams = checkPropertiesTypes(params, optional);
+    var incorrectOptionalTypes = Object.keys(cleanOptionalParams).filter(function (key) {
+        return (optionalParams[key] === null);
+    });
+    if (incorrectOptionalTypes.length) {
+        if (verbose) {
+            console.error('Incorrect optional type:', incorrectOptionalTypes.join(', '));
+        }
 
-    if (incorrectTypes.length) {
-        if (verbose) console.error('Incorrect optional type:', incorrectTypes.join(', '));
-        return false;
+        return null;
     }
 
-
-    // Strip params of unspecified properties
-
-    var cleanParams = {};
-
-    Object.keys(schema).forEach(function (requiredProperty) {
-        cleanParams[requiredProperty] = params[requiredProperty];
+    // Join the cleaned optional types to the cleaned required types
+    Object.keys(cleanOptionalParams).forEach(function (key) {
+        cleanParams[key] = cleanOptionalParams[key];
     });
-
-    Object.keys(optional).forEach(function (optionalProperty) {
-        if (params[optionalProperty] !== undefined) {
-            cleanParams[optionalProperty] = params[optionalProperty];
-        }
-    });
-
 
     return cleanParams;
 };
