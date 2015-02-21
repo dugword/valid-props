@@ -135,8 +135,8 @@ var checkPropertiesTypes = function(params, schema) {
 // Public Methods
 
 self.setVerbose = function(flag) {
-    if (flag === undefined) return verbose = true;
-    if (flag) return verbose = true;
+    if (flag === undefined) return (verbose = true);
+    if (flag) return (verbose = true);
     verbose = false;
 };
 
@@ -192,4 +192,34 @@ self.validate = function(params, schema, optional) {
     });
 
     return cleanParams;
+};
+
+self.attach = function (object) {
+    // Set hidden flag to determine if object has been validated
+    Object.defineProperty(object, '__validated', {
+        value: false,
+        enumerable: false,
+        configurable: false,
+        writable: true
+    });
+   
+    // Replace all properties with getters, throw an error if not validated
+    Object.keys(object).forEach(function (key) {
+        var property = object[key];
+        object.__defineGetter__(key, function () {
+            if (!this.__validated) throw new Error('This object has not been validated');
+            return property;
+        });
+    });
+
+    // Validate the object and set the internal flag
+    Object.defineProperty(object, 'validate', {
+        value: function (schema, optional) {
+            this.__validated = true;
+            return self.validate(object, schema, optional);
+        },
+        writable: false,
+        enumerable: false,
+        configurable: false
+    });
 };
