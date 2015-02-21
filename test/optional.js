@@ -5,7 +5,7 @@ var assert = require('assert'),
     expect = require('chai').expect,
     raw = require('./raw');
 
-describe('Confirm valid object', function () {
+describe('Confirm optional object', function () {
 
     var valid = props.validate(raw.all, {}, {
         myString: 'string',
@@ -16,6 +16,25 @@ describe('Confirm valid object', function () {
         myDate: 'date',
         myTrue: 'boolean',
         myFalse: 'boolean'
+    });
+
+    var validOptional = props.validate(raw.all, {
+        myString: 'string',
+        myNumber: 'number',
+        myArray: 'array',
+        myTypedArray: '[number]',
+        myObject: 'object',
+        myDate: 'date',
+        myTrue: 'boolean',
+        myFalse: 'boolean'
+    },{
+        foo: 'string',
+        bar: 'number',
+        baz: 'array',
+        qux: '[number]',
+        quux: 'object',
+        corge: 'date',
+        grault: 'boolean'
     });
 
     it('valid should not be undefined', function () {
@@ -52,5 +71,9 @@ describe('Confirm valid object', function () {
 
     it('valid myFalse should be false', function () {
         expect(valid.myFalse).to.be.false();
+    });
+
+    it('validOptional should not be null', function () {
+        expect(validOptional).to.not.be.null();
     });
 });
