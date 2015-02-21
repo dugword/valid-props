@@ -37,7 +37,7 @@ describe('Confirm optional object', function () {
         grault: 'boolean'
     });
 
-    it('valid should not be undefined', function () {
+    it('valid should not be null', function () {
         expect(valid).to.not.be.null();
     });
 
@@ -65,11 +65,11 @@ describe('Confirm optional object', function () {
         expect(valid.myDate).to.be.an.instanceof(Date);
     });
 
-    it('valid myTrue should be true', function () {
+    it('valid.myTrue should be true', function () {
         expect(valid.myTrue).to.be.true();
     });
 
-    it('valid myFalse should be false', function () {
+    it('valid.myFalse should be false', function () {
         expect(valid.myFalse).to.be.false();
     });
 
