@@ -111,17 +111,22 @@ checker.boolean = function(value) {
 var checkPropertiesTypes = function(params, schema) {
     var cleanParams = {};
 
-    Object.keys(schema).forEach(function(requiredProperty) {
-        var requiredType = schema[requiredProperty],
-            value = params[requiredProperty];
+    Object.keys(schema).forEach(function(key) {
+        var requiredType = schema[key],
+            value = params[key];
 
-        if (arrayRegex.test(requiredType)) {
-            var arrayType = arrayRegex.exec(requiredType)[1];
-            cleanParams[requiredProperty] = checker.typedArray(value, arrayType);
+        // Don't check properties that don't exist
+        if (!params.hasOwnProperty(key)) {
             return;
         }
 
-        cleanParams[requiredProperty] = checker[requiredType](value);
+        if (arrayRegex.test(requiredType)) {
+            var arrayType = arrayRegex.exec(requiredType)[1];
+            cleanParams[key] = checker.typedArray(value, arrayType);
+            return;
+        }
+
+        cleanParams[key] = checker[requiredType](value);
     });
 
     return cleanParams;
@@ -171,7 +176,7 @@ self.validate = function(params, schema, optional) {
     // Check that every optional request is of the required type
     cleanOptionalParams = checkPropertiesTypes(params, optional);
     var incorrectOptionalTypes = Object.keys(cleanOptionalParams).filter(function (key) {
-        return (optionalParams[key] === null);
+        return (cleanOptionalParams[key] === null);
     });
     if (incorrectOptionalTypes.length) {
         if (verbose) {
