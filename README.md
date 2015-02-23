@@ -34,6 +34,8 @@ You can also attach the validate(schema, optionalSchema) method to an object wit
             username: 'string',
             password: 'string',
             age: 'number',
+            birthday: 'date',
+            stats: '[string]', // An array of strings
             foo: 'array',
             bar: 'object'
         }, {
@@ -73,9 +75,10 @@ You can also attach the validate(schema, optionalSchema) method to an object wit
 - string
 - number
 - array
-- typed array
 - object
 - boolean
+- typed array (Supports any other type)
+- Date (JavaScript Date object)
 
 # BUGS AND LIMITATIONS
 Please let me know
