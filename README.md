@@ -22,7 +22,7 @@ If an optional schema is given, the method will behave as normal if the property
 
 NOTE: The validate method will do type coercion and return the specified type in the result object.
 
-You can also attach the validate(schema, optionalSchema) method to an object with the attach method. Doing this will set a hidden property, and accessing any properties on the object with throw an error until validate is called.
+You can also attach the validate(schema, optionalSchema) method to an object with the attach method. Doing this will set a hidden property, and accessing any properties on the object with throw an error until validate is called. In frameworks like Express this can be set in a middleware function forcing all routes to validate their input.
 
 ## EXAMPLE
 
@@ -46,6 +46,28 @@ You can also attach the validate(schema, optionalSchema) method to an object wit
 
         res.send('success')
     }
+
+function (req, res) {
+    props.attach(req.body);
+
+    if (req.body.username === 'admin') // THROWS ERROR
+        return res.render('admin.jade')
+
+    res.send('user.jade')
+}
+
+function (req, res) {
+    props.attach(req.body);
+
+    req.body.validate({     // Clears flag preventing access
+        username: 'string'
+    });
+
+    if (req.body.username === 'admin')
+        return res.render('admin.jade')
+
+    res.send('user.jade')
+}
 
 # TYPES
 - string
