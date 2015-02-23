@@ -47,27 +47,27 @@ You can also attach the validate(schema, optionalSchema) method to an object wit
         res.send('success')
     }
 
-function (req, res) {
-    props.attach(req.body);
+    function (req, res) {
+        props.attach(req.body);
 
-    if (req.body.username === 'admin') // THROWS ERROR
-        return res.render('admin.jade')
+        if (req.body.username === 'admin') // THROWS ERROR
+            return res.render('admin.jade')
 
-    res.send('user.jade')
-}
+        res.send('user.jade')
+    }
 
-function (req, res) {
-    props.attach(req.body);
+    function (req, res) {
+        props.attach(req.body);
 
-    req.body.validate({     // Clears flag preventing access
-        username: 'string'
-    });
+        req.body.validate({     // Clears flag preventing access
+            username: 'string'
+        });
 
-    if (req.body.username === 'admin')
-        return res.render('admin.jade')
+        if (req.body.username === 'admin')
+            return res.render('admin.jade')
 
-    res.send('user.jade')
-}
+        res.send('user.jade')
+    }
 
 # TYPES
 - string
