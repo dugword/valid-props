@@ -59,11 +59,11 @@ You can also attach the validate(schema, optionalSchema) method to an object wit
     function (req, res) {
         props.attach(req.body);
 
-        req.body.validate({     // Clears flag preventing access
+        var params = req.body.validate({     // Clears flag preventing access
             username: 'string'
         });
 
-        if (req.body.username === 'admin')
+        if (params.username === 'admin')
             return res.render('admin.jade')
 
         res.send('user.jade')
