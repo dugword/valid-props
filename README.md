@@ -2,7 +2,7 @@ valid-props
 ===========
 
 ## VERSION
-0.3.0
+0.3.1
 
 ## SYNOPSIS
 NPM module that verifies if a JavaScript Object contains valid pre-defined properties. Useful for REST web services to confirm that JSON POST requests contain the expected information.
