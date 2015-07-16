@@ -103,6 +103,7 @@ forcing all routes to validate their input.
   - Coerces strings that look like dates
 
 # BUGS AND LIMITATIONS
+[X] FIXED: When passing non-declared params but none are invalid an empty object was being returned.
 Please let me know
 
 # TODO
