@@ -191,7 +191,8 @@ self.validate = function(params, schema, optional) {
         cleanParams[key] = cleanOptionalParams[key];
     });
 
-    if (Object.keys(cleanParams) === 0) {
+    // TODO: This was a bugfix, needs a test
+    if (Object.keys(cleanParams).length === 0) {
         return null;
     }
 
