@@ -44,6 +44,7 @@ forcing all routes to validate their input.
 ## EXAMPLE
 
     var props = require('valid-props');
+    // props.errorType('throw') // Throws an error instead of returning null
 
     function (req, res) {
 
@@ -55,8 +56,9 @@ forcing all routes to validate their input.
             stats: '[string]', // An array of strings
             foo: 'array',
             bar: 'object'
+            blerg: 'string?', // Trailing '?' for optional properties
         }, {
-            baz: 'boolean'
+            baz: 'boolean' // Or pass a second optional schema
         });
 
         if (params === null) {

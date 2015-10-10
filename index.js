@@ -8,9 +8,11 @@ var arrayRegex = /\[(string|number|boolean|date|object|array)]/;
 
 var checker = {};
 
+var errorType;
+
 // Casts value as string,
 // this will always be valid unless the string is empty
-checker.string = function(value) {
+checker.string = function (value) {
     // TODO (Doug): This may not capture everything we want
     if (!value) {
         return null;
@@ -18,7 +20,7 @@ checker.string = function(value) {
     return value.toString();
 };
 
-checker.number = function(value) {
+checker.number = function (value) {
     value = parseFloat(value);
 
     if (isNaN(value)) {
@@ -28,7 +30,7 @@ checker.number = function(value) {
     return value;
 };
 
-checker.date = function(value) {
+checker.date = function (value) {
     value = new Date(value);
 
     if (value.toString() === 'Invalid Date') {
@@ -38,7 +40,7 @@ checker.date = function(value) {
     return value;
 };
 
-checker.array = function(value) {
+checker.array = function (value) {
     if (!Array.isArray(value)) {
         return null;
     }
@@ -47,7 +49,7 @@ checker.array = function(value) {
 };
 
 // TODO (Doug): I'm sure this isn't working right
-checker.typedArray = function(value, type) {
+checker.typedArray = function (value, type) {
     var cleanArray = [];
     if (!Array.isArray(value)) {
         return null;
@@ -57,7 +59,7 @@ checker.typedArray = function(value, type) {
         cleanArray.push(checker[type](item));
     });
 
-    var incorrectValues = cleanArray.filter(function(item) {
+    var incorrectValues = cleanArray.filter(function (item) {
         return (item === null);
     });
 
@@ -69,7 +71,7 @@ checker.typedArray = function(value, type) {
 };
 
 // TODO (Doug): This needs some work
-checker.object = function(value) {
+checker.object = function (value) {
     if (typeof value !== 'object') {
         return null;
     }
@@ -78,7 +80,7 @@ checker.object = function(value) {
 };
 
 // TODO (Doug): May want to re-evaluate this
-checker.boolean = function(value) {
+checker.boolean = function (value) {
     if (value === undefined || value === null) {
         return null;
     }
@@ -108,10 +110,10 @@ checker.boolean = function(value) {
 
 
 // Sets all properties to their clean value or null
-var checkPropertiesTypes = function(params, schema) {
+var checkPropertiesTypes = function (params, schema) {
     var cleanParams = {};
 
-    Object.keys(schema).forEach(function(key) {
+    Object.keys(schema).forEach(function (key) {
         var requiredType = schema[key],
             value = params[key];
 
@@ -134,26 +136,43 @@ var checkPropertiesTypes = function(params, schema) {
 
 // Public Methods
 
-self.setVerbose = function(flag) {
+self.setVerbose = function (flag) {
     if (flag === undefined) return (verbose = true);
     if (flag) return (verbose = true);
     verbose = false;
 };
 
-self.validate = function(params, schema, optional) {
+self.errorType = function (type) {
+    if (type === 'throw') {
+        errorType = 'throw';
+    }
+};
+
+self.validate = function (params, schema, optional) {
     var cleanParams = {},
         cleanOptionalParams = {};
 
     optional = optional || {};
 
+    Object.keys(schema).forEach(key => {
+        if (schema[key].slice(-1) === '?') {
+            optional[key] = schema[key].slice(0, -1);
+            delete schema[key];
+        }
+    });
+
     // Check that every required property exists
-    var missingProperties = Object.keys(schema).filter(function(key) {
+    var missingProperties = Object.keys(schema).filter(function (key) {
         return (!params.hasOwnProperty([key]));
     });
 
     if (missingProperties.length) {
+        let errorMsg = 'Missing properties: ' + missingProperties.join(', ');
         if (verbose) {
-            console.error('Missing properties:', missingProperties.join(', '));
+            console.error(errorMsg);
+        }
+        if (errorType === 'throw') {
+            throw new Error(errorMsg);
         }
 
         return null;
@@ -165,8 +184,12 @@ self.validate = function(params, schema, optional) {
         return (cleanParams[key] === null);
     });
     if (incorrectTypes.length) {
+        let errorMsg = 'Incorrect required type: ' + incorrectTypes.join(', ');
         if (verbose) {
-            console.error('Incorrect required type:', incorrectTypes.join(', '));
+            console.error(errorMsg);
+        }
+        if (errorType === 'throw') {
+            throw new Error(errorMsg);
         }
 
         return null;
@@ -179,8 +202,12 @@ self.validate = function(params, schema, optional) {
         return (cleanOptionalParams[key] === null);
     });
     if (incorrectOptionalTypes.length) {
+        let errorMsg = 'Incorrect optional type:' + incorrectOptionalTypes.join(', ');
         if (verbose) {
-            console.error('Incorrect optional type:', incorrectOptionalTypes.join(', '));
+            console.error(errorMsg);
+        }
+        if (errorType === 'throw') {
+            throw new Error(errorMsg);
         }
 
         return null;
@@ -207,7 +234,7 @@ self.attach = function (object) {
         configurable: false,
         writable: true
     });
-   
+
     // Replace all properties with getters, throw an error if not validated
     Object.keys(object).forEach(function (key) {
         var property = object[key];
