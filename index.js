@@ -9,6 +9,7 @@ var arrayRegex = /\[(string|number|boolean|date|object|array)]/;
 var checker = {};
 
 self.errorType = undefined;
+self.apiVersion = 1;
 
 // Casts value as string,
 // this will always be valid unless the string is empty
@@ -40,19 +41,32 @@ checker.date = function (value) {
     return value;
 };
 
-checker.array = function (value) {
+checker.array = function (value, apiVersion) {
     if (!Array.isArray(value)) {
         return null;
+    }
+    if (apiVersion >= 1.5) {
+        // Reject empty arrays (Why would they pass that?)
+        if (!value.length) {
+            return null;
+        }
     }
 
     return value;
 };
 
 // TODO (Doug): I'm sure this isn't working right
-checker.typedArray = function (value, type) {
+checker.typedArray = function (value, type, apiVersion) {
     var cleanArray = [];
     if (!Array.isArray(value)) {
         return null;
+    }
+
+    if (apiVersion >= 1.5) {
+        // Reject empty arrays (Why would they pass that?)
+        if (!value.length) {
+            return null;
+        }
     }
 
     value.forEach(function (item) {
@@ -71,9 +85,15 @@ checker.typedArray = function (value, type) {
 };
 
 // TODO (Doug): This needs some work
-checker.object = function (value) {
+checker.object = function (value, apiVersion) {
     if (typeof value !== 'object') {
         return null;
+    }
+    // Reject empty objects
+    if (apiVersion >= 1.5) {
+        if (!Object.keys(value).length) {
+            return null;
+        }
     }
 
     return value;
@@ -110,7 +130,7 @@ checker.boolean = function (value) {
 
 
 // Sets all properties to their clean value or null
-var checkPropertiesTypes = function (params, schema) {
+var checkPropertiesTypes = function (params, schema, apiVersion) {
     var cleanParams = {};
 
     Object.keys(schema).forEach(function (key) {
@@ -124,11 +144,11 @@ var checkPropertiesTypes = function (params, schema) {
 
         if (arrayRegex.test(requiredType)) {
             var arrayType = arrayRegex.exec(requiredType)[1];
-            cleanParams[key] = checker.typedArray(value, arrayType);
+            cleanParams[key] = checker.typedArray(value, arrayType, apiVersion);
             return;
         }
 
-        cleanParams[key] = checker[requiredType](value);
+        cleanParams[key] = checker[requiredType](value, apiVersion);
     });
 
     return cleanParams;
@@ -148,10 +168,13 @@ self.errorType = function (type) {
     }
 };
 
-self.validate = function (params, schema, optional, errorType) {
+self.validate = function (params, schema, optional, errorType, apiVersion) {
     // If no errorType is specified, check for global errorType
     if (errorType === undefined) {
         errorType = self.errorType;
+    }
+    if (apiVersion === undefined) {
+        apiVersion = self.apiVersion;
     }
 
     var cleanParams = {},
@@ -184,7 +207,7 @@ self.validate = function (params, schema, optional, errorType) {
     }
 
     // Check that every required property is of the required type
-    cleanParams = checkPropertiesTypes(params, schema);
+    cleanParams = checkPropertiesTypes(params, schema, apiVersion);
     var incorrectTypes = Object.keys(cleanParams).filter(function (key) {
         return (cleanParams[key] === null);
     });
@@ -233,12 +256,14 @@ self.validate = function (params, schema, optional, errorType) {
 
 self.create = function (opts) {
     opts = opts || {};
-    const _errorType = opts.errorType;
+    const _errorType = opts.errorType,
+        _apiVersion = opts.apiVersion;
 
     return {
-        validate: function (params, schema, optional, errorType) {
+        validate: function (params, schema, optional, errorType, apiVersion) {
             errorType = errorType || _errorType;
-            return self.validate(params, schema, optional, errorType);
+            apiVersion = apiVersion || _apiVersion;
+            return self.validate(params, schema, optional, errorType, apiVersion);
         }
     };
 };

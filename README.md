@@ -2,7 +2,7 @@ valid-props
 ===========
 
 ## VERSION
-1.0.0
+1.5.0
 
 ## SYNOPSIS
 Verifies if a JavaScript Object contains valid pre-defined properties.
@@ -100,6 +100,21 @@ forcing all routes to validate their input.
     }
     catch (e) {
         console.error(e.message); // 'Missing properties: foo'
+    }
+
+    // Create a new isolated instance with updated behaviour
+    var validator = props.create({
+        errorType: 'throw',
+        apiVersion: 1.5     // API Version 1.5 rejects empty arrays and objects
+    });
+
+    try {
+        var invalid = validator.validate({bar: []}, {
+            foo: 'array'
+        });
+    }
+    catch (e) {
+        console.error(e.message); // 'Invalid type: array'
     }
 
 # TYPES
