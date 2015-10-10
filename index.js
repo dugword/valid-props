@@ -232,11 +232,13 @@ self.validate = function (params, schema, optional, errorType) {
 };
 
 self.create = function (opts) {
+    opts = opts || {};
     const _errorType = opts.errorType;
 
     return {
         validate: function (params, schema, optional, errorType) {
-            self.validate(params, schema, optional, errorType || _errorType);
+            errorType = errorType || _errorType;
+            return self.validate(params, schema, optional, errorType);
         }
     };
 };

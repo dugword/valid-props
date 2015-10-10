@@ -10,24 +10,9 @@ describe('Confirm valid object', function () {
         errorType: 'throw',
     });
 
-    var valid = props.validate({}, {
-        myString: 'string',
-        myNumber: 'number',
-        myArray: 'array',
-        myTypedArray: '[number]',
-        myObject: 'object',
-        myDate: 'date',
-        myTrue: 'boolean',
-        myFalse: 'boolean'
-    });
-
     it('valid should not be null', function () {
-        expect(valid).to.be.null();
-    });
 
-    var errorMessage = '';
-    try {
-        var invalid = validator.validate({}, {
+        var valid = props.validate({}, {
             myString: 'string',
             myNumber: 'number',
             myArray: 'array',
@@ -37,13 +22,60 @@ describe('Confirm valid object', function () {
             myTrue: 'boolean',
             myFalse: 'boolean'
         });
-    }
-    catch (e) {
-        errorMessage = e.message;
-    }
+        expect(valid).to.be.null();
+    });
 
     it('invalid error message should be invalid', function () {
+        var errorMessage = '';
+        try {
+            var invalid = validator.validate({}, {
+                myString: 'string',
+                myNumber: 'number',
+                myArray: 'array',
+                myTypedArray: '[number]',
+                myObject: 'object',
+                myDate: 'date',
+                myTrue: 'boolean',
+                myFalse: 'boolean'
+            });
+        }
+        catch (e) {
+            errorMessage = e.message;
+        }
         expect(errorMessage).to.equal('Missing properties: myString, myNumber, myArray, myTypedArray, myObject, myDate, myTrue, myFalse');
+    });
+
+    it('valid obj should be valid when error type is throw', function () {
+
+        var validThrow;
+        try {
+            validThrow = validator.validate({
+                myString: 'string',
+                myNumber: '42',
+                myArray: ['array'],
+                myTypedArray: [1, 2, 3],
+                myObject: {
+                    foo: 'bar'
+                },
+                myDate: new Date(),
+                myTrue: true,
+                myFalse: false,
+            }, {
+                myString: 'string',
+                myNumber: 'number?',
+                myArray: 'array',
+                myTypedArray: '[number]',
+                myObject: 'object',
+                myDate: 'date',
+                myTrue: 'boolean',
+                myFalse: 'boolean?'
+            });
+        }
+        catch (err) {
+        }
+
+        expect(validThrow).to.not.be.null();
+        expect(validThrow).to.not.be.undefined();
     });
 
 
