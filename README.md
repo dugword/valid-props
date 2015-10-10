@@ -90,6 +90,18 @@ forcing all routes to validate their input.
         res.send('user.jade')
     }
 
+    // Create a new isolated instance with a different error type
+    var validator = props.create({ errorType: 'throw' });
+
+    try {
+        var invalid = validator.validate({bar: 'bar'}, {
+            foo: 'string'
+        });
+    }
+    catch (e) {
+        console.error(e.message); // 'Missing properties: foo'
+    }
+
 # TYPES
 - string
   - All types will be coerced to a string by calling their `toString()` method

@@ -8,7 +8,7 @@ var arrayRegex = /\[(string|number|boolean|date|object|array)]/;
 
 var checker = {};
 
-var errorType;
+self.errorType = undefined;
 
 // Casts value as string,
 // this will always be valid unless the string is empty
@@ -144,11 +144,16 @@ self.setVerbose = function (flag) {
 
 self.errorType = function (type) {
     if (type === 'throw') {
-        errorType = 'throw';
+        self.errorType = 'throw';
     }
 };
 
-self.validate = function (params, schema, optional) {
+self.validate = function (params, schema, optional, errorType) {
+    // If no errorType is specified, check for global errorType
+    if (errorType === undefined) {
+        errorType = self.errorType;
+    }
+
     var cleanParams = {},
         cleanOptionalParams = {};
 
@@ -224,6 +229,16 @@ self.validate = function (params, schema, optional) {
     }
 
     return cleanParams;
+};
+
+self.create = function (opts) {
+    const _errorType = opts.errorType;
+
+    return {
+        validate: function (params, schema, optional, errorType) {
+            self.validate(params, schema, optional, errorType || _errorType);
+        }
+    };
 };
 
 self.attach = function (object) {
