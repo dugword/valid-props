@@ -2,7 +2,7 @@ valid-props
 ===========
 
 ## VERSION
-1.5.0
+1.5.1
 
 ## SYNOPSIS
 Verifies if a JavaScript Object contains valid pre-defined properties.

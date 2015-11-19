@@ -153,8 +153,15 @@ var checkPropertiesTypes = function (params, schema, apiVersion) {
 
         if (arrayRegex.test(requiredType)) {
             var arrayType = arrayRegex.exec(requiredType)[1];
+            if (validTypes.indexOf(arrayType) === -1) {
+                throw new Error('Invalid type in schema: ' + arrayType);
+            }
             cleanParams[key] = checker.typedArray(value, arrayType, apiVersion);
             return;
+        }
+
+        if (validTypes.indexOf(requiredType) === -1) {
+            throw new Error('Invalid type in schema: ' + requiredType);
         }
 
         cleanParams[key] = checker[requiredType](value, apiVersion);
