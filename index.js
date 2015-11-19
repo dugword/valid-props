@@ -6,6 +6,15 @@ var verbose = false;
 
 var arrayRegex = /\[(string|number|boolean|date|object|array)]/;
 
+var validTypes = [
+    'string',
+    'number',
+    'boolean',
+    'date',
+    'object',
+    'array'
+];
+
 var checker = {};
 
 self.errorType = undefined;
@@ -182,7 +191,7 @@ self.validate = function (params, schema, optional, errorType, apiVersion) {
 
     optional = optional || {};
 
-    Object.keys(schema).forEach(key => {
+    Object.keys(schema).forEach(function (key) {
         if (schema[key].slice(-1) === '?') {
             optional[key] = schema[key].slice(0, -1);
             delete schema[key];
@@ -225,7 +234,7 @@ self.validate = function (params, schema, optional, errorType, apiVersion) {
 
 
     // Check that every optional request is of the required type
-    cleanOptionalParams = checkPropertiesTypes(params, optional);
+    cleanOptionalParams = checkPropertiesTypes(params, optional, apiVersion);
     var incorrectOptionalTypes = Object.keys(cleanOptionalParams).filter(function (key) {
         return (cleanOptionalParams[key] === null);
     });
