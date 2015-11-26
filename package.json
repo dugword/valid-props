@@ -1,6 +1,6 @@
 {
   "name": "valid-props",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Validates an objects properties",
   "main": "index.js",
   "scripts": {
@@ -33,5 +33,5 @@
     "gulp-babel": "^6.1.0",
     "mocha": "^2.1.0"
   },
-  "tonicExampleFile": "tonic-example.js"
+  "tonicExampleFilename": "tonic-example.js"
 }
