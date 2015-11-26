@@ -1,4 +1,4 @@
-valid-props
+![valid-props logo](/images/logo.png) valid-props
 ===========
 
 ## VERSION
