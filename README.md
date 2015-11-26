@@ -5,105 +5,129 @@ valid-props
 1.5.1
 
 ## SYNOPSIS
-Verifies if a JavaScript Object contains valid pre-defined properties.
-Useful for web services and other sources of user input to confirm that
-requests contain the expected information.
+Verifies a JavaScript object contains valid pre-defined properties of a given
+type. Useful for web services and other sources of user input to confirm that
+objects contain the expected information.
 
 ## METHODS
-The valid-props module contains the method:
+The valid-props module contains the methods:
+`attach(object)`
+`create(opitons)`
 `validate(object, schema [,optionalSchema])`
 
-It accepts an object as the first parameter and compares it to the schema
-object in the second parameter.
+The `create` method returns a new instance of the valid-props object with
+the behaviour defined by the `options` object.
 
-All the properties declared in the schema are required, and if the object being
-checking is missing a property or the property is of a different type the value
+The `validate` method accepts an object as the first parameter and compares it
+to the schema object in the second parameter.
+
+All the properties declared in the schema are required. If the object being
+checked is missing a property or the property is of a different type the value
 "null" will be returned.
 
 If the object contains all the properties of the correct type then a new object
 is returned with those properties. Any additional undeclared properties from
-the object are not returned.
+the original object are not returned.
 
-If an optional schema is given, the method will behave as normal if the
+If an optional schema is given, the method will do nothing if the optional
 property is not included in the object. If the property is present and of the
 correct type it will be returned with the resultant object. If the optional
-property is the incorrect type the entire return value will be null.
+property is of the incorrect type the entire return value will be null.
 
 NOTE: The validate method will do type coercion beyond what JavaScript does and
-returns the specified type in the result object.
-
+returns the specified type in the result object. E.g the string `"False"` will
+return the boolean value `false` if a boolean is expected.
 
 You can also attach the validate method to an object:
 `attach(object)`
 
-This will attach a hidden function `validate` to the object, and accessing any
-properties on the object with throw an error until the validate function is
-called. In frameworks like Express this can be set in a middleware function
-forcing all routes to validate their input.
+This will attach a hidden function `validate` to the object which functions
+like the `validate` method, except that the method validates the object it is
+attached and only accepts schema and opitonalschema arguments.
+
+`object.validate(schema [,optionalSchema])`
+
+Accessing any properties on the object with throw an error until the validate
+function is called. In frameworks like Express this can be set in a middleware
+function forcing all routes to validate request parameters.
 
 ## EXAMPLE
 
+    // Example 1: Static method call
     var props = require('valid-props');
-    // props.errorType('throw') // Throws an error instead of returning null
 
-    function (req, res) {
+    function someRoute(req, res) {
 
         var params = props.validate(req.body, {
             username: 'string',
             password: 'string',
             age: 'number',
-            birthday: 'date',
+            birthday: 'date',  // Casts valid dates to a new Date() object
             stats: '[string]', // An array of strings
             foo: 'array',
             bar: 'object'
             blerg: 'string?', // Trailing '?' for optional properties
         }, {
-            baz: 'boolean' // Or pass a second optional schema
+            baz: 'boolean' // Or pass a second optional schema,
         });
 
         if (params === null) {
-            return res.send('error')
+            return res.send('Error: Invalid request parameters');
         }
 
-        res.send('success')
+        res.send('Success: A valid request was sent');
     }
 
-    function (req, res) {
+    // Example 2: Attached method call
+    var props = require('valid-props');
+
+    function crashAppRoute(req, res) {
         props.attach(req.body);
 
-        if (req.body.username === 'admin') // THROWS ERROR
-            return res.render('admin.jade')
+        if (req.body.username === 'admin') { // THROWS ERROR
+            return res.render('admin.jade');
+        }
 
-        res.send('user.jade')
+        res.send('user.jade');
     }
 
-    function (req, res) {
+    function workingAppRoute(req, res) {
         props.attach(req.body);
 
         var params = req.body.validate({     // Clears flag preventing access
-            username: 'string'
+            username: 'string',
         });
 
-        if (params.username === 'admin')
-            return res.render('admin.jade')
+        if (params.username === 'admin') {
+            return res.render('admin.jade');
+        }
 
-        res.send('user.jade')
+        res.send('user.jade');
     }
 
-    // Create a new isolated instance with a different error type
-    var validator = props.create({ errorType: 'throw' });
+    // Example 3: Create a new isolated instance with a different error type
+    var props = require('valid-props'),
+        validator = props.create({ errorType: 'throw' });
+
+    var invalidParamsNull = props.validate({bar: 'bar'}, {
+    	foo: 'string',
+    });
+
+    if (invalidParams === null) {
+        console.log('This value is ', invalidParams); // 'This value is null'
+    }
 
     try {
-        var invalid = validator.validate({bar: 'bar'}, {
-            foo: 'string'
+        var invalidParamsThrow = validator.validate({bar: 'bar'}, {
+            foo: 'string',
         });
     }
     catch (e) {
         console.error(e.message); // 'Missing properties: foo'
     }
 
-    // Create a new isolated instance with updated behaviour
-    var validator = props.create({
+    // Example 4: Create a new isolated instance with updated behaviour
+    var validator = require('valid-props').create({
         errorType: 'throw',
         apiVersion: 1.5     // API Version 1.5 rejects empty arrays and objects
     });
@@ -132,7 +156,6 @@ forcing all routes to validate their input.
   - Coerces strings that look like dates
 
 # BUGS AND LIMITATIONS
-[X] FIXED: When passing non-declared params but none are invalid an empty object was being returned.
 Please let me know
 
 # TODO

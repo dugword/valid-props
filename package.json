@@ -1,6 +1,6 @@
 {
   "name": "valid-props",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Validates an objects properties",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,11 @@
   "keywords": [
     "valid",
     "validator",
-    "validation"
+    "validation",
+    "props",
+    "properties",
+    "type",
+    "types"
   ],
   "author": "Douglas L. Jenkins",
   "license": "MIT",
@@ -21,9 +25,6 @@
     "url": "https://github.com/dugword/valid-props/issues"
   },
   "homepage": "https://github.com/dugword/valid-props",
-  "devDependencies": {
-    "mocha": "^2.1.0"
-  },
   "devDependencies": {
     "chai": "^1.10.0",
     "mocha": "^2.1.0"
