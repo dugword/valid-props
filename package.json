@@ -33,5 +33,5 @@
     "gulp-babel": "^6.1.0",
     "mocha": "^2.1.0"
   },
-  "tonicExample": "tonic-example.js"
+  "tonicExampleFile": "tonic-example.js"
 }
