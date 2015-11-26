@@ -10,7 +10,7 @@ type. Useful for web services and other sources of user input to confirm that
 objects contain the expected information.
 
 ## METHODS
-The valid-props module contains the methods:
+The valid-props module contains these methods:
 
     attach(object)
     create(opitons)
