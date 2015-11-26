@@ -11,9 +11,10 @@ objects contain the expected information.
 
 ## METHODS
 The valid-props module contains the methods:
-`attach(object)`
-`create(opitons)`
-`validate(object, schema [,optionalSchema])`
+
+    attach(object)
+    create(opitons)
+    validate(object, schema [,optionalSchema])
 
 The `create` method returns a new instance of the valid-props object with
 the behaviour defined by the `options` object.
