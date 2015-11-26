@@ -2,7 +2,7 @@
 ===========
 
 ## VERSION
-1.5.1
+1.6.0
 
 ## SYNOPSIS
 Verifies a JavaScript object contains valid pre-defined properties of a given
