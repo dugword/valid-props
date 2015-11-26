@@ -65,7 +65,7 @@ function forcing all routes to validate request parameters.
             birthday: 'date',  // Casts valid dates to a new Date() object
             stats: '[string]', // An array of strings
             foo: 'array',
-            bar: 'object'
+            bar: 'object',
             blerg: 'string?', // Trailing '?' for optional properties
         }, {
             baz: 'boolean' // Or pass a second optional schema,
@@ -113,8 +113,8 @@ function forcing all routes to validate request parameters.
     	foo: 'string',
     });
 
-    if (invalidParams === null) {
-        console.log('This value is ', invalidParams); // 'This value is null'
+    if (invalidParamsNull === null) {
+        console.log('This value is ', invalidParamsNull); // 'This value is null'
     }
 
     try {
