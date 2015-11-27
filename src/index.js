@@ -6,11 +6,14 @@ const arrayRegex = /\[(string|number|boolean|date|object|array)\]/;
 const validTypes = [
     'string',
     'number',
+    'int',
+    'function',
     'boolean',
     'date',
     'object',
     'array',
 ];
+
 
 const checker = createChecker();
 
@@ -22,6 +25,7 @@ function createChecker() {
         if (!value) {
             return null;
         }
+
         return value.toString();
     }
 
@@ -180,6 +184,18 @@ function checkPropertiesTypes(params, schema, apiVersion) {
 }
 
 function createValidProps(opts) {
+
+    const validTypes = [
+        'string',
+        'number',
+        'int',
+        'function',
+        'boolean',
+        'date',
+        'object',
+        'array',
+    ];
+
     opts = opts || {};
     let errorType = opts.errorType,
         apiVersion = opts.apiVersion;
@@ -307,10 +323,22 @@ function createValidProps(opts) {
         });
     }
 
+    function registerType(name, func) {
+        validTypes.push(name);
+
+    }
+
+    function registerSchema(name, schema, optionalSchema) {
+
+    }
+
     return {
         attach,
         validate,
         setVerbose,
+        registerType,
+        registerSchema,
+        use,
     };
 }
 

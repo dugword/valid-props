@@ -1,8 +1,12 @@
 ![valid-props logo](/images/logo.png) valid-props
 ===========
 
+The ultra lightweight, dependency free, flexible, extensible, property
+validator with a simple succinct interface that runs in any ES5 compatible
+environment.
+
 ## VERSION
-1.6.2
+2.0.0
 
 ## SYNOPSIS
 Verifies a JavaScript object contains valid pre-defined properties of a given
@@ -14,6 +18,9 @@ The valid-props module contains these methods:
 
     attach(object)
     create(opitons)
+    registerType(name, function)
+    registerSchema(name, schema [,optionalSchema])
+    use(plugin)
     validate(object, schema [,optionalSchema])
 
 The `create` method returns a new instance of the valid-props object with
@@ -147,7 +154,11 @@ function forcing all routes to validate request parameters.
   - All types will be coerced to a string by calling their `toString()` method
 - number
   - Coerces strings that look like numbers
+- int
+  - Coerces strings that look like numbers
+  - Floors decimal values to integers
 - array
+- function
 - object
 - boolean
   - Coerces strings that look like boolean values
@@ -156,12 +167,13 @@ function forcing all routes to validate request parameters.
 - Date (JavaScript Date object)
   - Coerces strings that look like dates
 
+# ES2015
+This module is written in es2015, but uses bable to transpile the code down to
+es5 compatable JavaScript. You can load the es2015 source directly:
+    const props = require('valid-props/src');
+
+This may result in performance improvements is you are running the module in a
+es2015 compatible environment.
+
 # BUGS AND LIMITATIONS
 Please let me know
-
-# TODO
-Future versions of this module will have behavior switches to enable more
-control over how invalid objects are handled (throw an error, vs return null),
-and how optional parameters are handled (if the optional property is the wrong
-type, strip it and return the required properties). There will also be a strict
-mode that does not do type coercion.
