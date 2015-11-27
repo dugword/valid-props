@@ -1,6 +1,5 @@
 'use strict';
 
-let verbose = false;
 
 const arrayRegex = /\[(string|number|boolean|date|object|array)\]/;
 
@@ -76,11 +75,11 @@ function createChecker() {
             }
         }
 
-        value.forEach(function (item) {
+        value.forEach(function(item) {
             cleanArray.push(checker[type](item));
         });
 
-        const incorrectValues = cleanArray.filter(function (item) {
+        const incorrectValues = cleanArray.filter(function(item) {
             return item === null;
         });
 
@@ -180,9 +179,12 @@ function checkPropertiesTypes(params, schema, apiVersion) {
     return cleanParams;
 }
 
-function createValidProps() {
-    let _errorType,
-        _apiVersion;
+function createValidProps(opts) {
+    opts = opts || {};
+    let errorType = opts.errorType,
+        apiVersion = opts.apiVersion;
+
+    let verbose = false;
 
     // Public Methods
 
@@ -198,19 +200,10 @@ function createValidProps() {
         verbose = false;
     }
 
-    function validate(params, schema, optional, errorType, apiVersion) {
-        // If no errorType is specified, check for global errorType
-        if (errorType === undefined) {
-            errorType = _errorType;
-        }
-        if (apiVersion === undefined) {
-            apiVersion = _apiVersion;
-        }
-
-
+    function validate(params, schema, optional) {
         optional = optional || {};
 
-        Object.keys(schema).forEach(function (key) {
+        Object.keys(schema).forEach(function(key) {
             if (schema[key].slice(-1) === '?') {
                 optional[key] = schema[key].slice(0, -1);
                 delete schema[key];
@@ -218,7 +211,7 @@ function createValidProps() {
         });
 
         // Check that every required property exists
-        const missingProperties = Object.keys(schema).filter(function (key) {
+        const missingProperties = Object.keys(schema).filter(function(key) {
             return !params.hasOwnProperty([key]);
         });
 
@@ -236,7 +229,7 @@ function createValidProps() {
 
         // Check that every required property is of the required type
         const cleanParams = checkPropertiesTypes(params, schema, apiVersion);
-        const incorrectTypes = Object.keys(cleanParams).filter(function (key) {
+        const incorrectTypes = Object.keys(cleanParams).filter(function(key) {
             return cleanParams[key] === null;
         });
         if (incorrectTypes.length) {
@@ -253,7 +246,7 @@ function createValidProps() {
 
         // Check that every optional request is of the required type
         const cleanOptionalParams = checkPropertiesTypes(params, optional, apiVersion);
-        const incorrectOptionalTypes = Object.keys(cleanOptionalParams).filter(function (key) {
+        const incorrectOptionalTypes = Object.keys(cleanOptionalParams).filter(function(key) {
             return cleanOptionalParams[key] === null;
         });
         if (incorrectOptionalTypes.length) {
@@ -269,7 +262,7 @@ function createValidProps() {
         }
 
         // Join the cleaned optional types to the cleaned required types
-        Object.keys(cleanOptionalParams).forEach(function (key) {
+        Object.keys(cleanOptionalParams).forEach(function(key) {
             cleanParams[key] = cleanOptionalParams[key];
         });
 
@@ -281,19 +274,6 @@ function createValidProps() {
         return cleanParams;
     }
 
-    function create(opts) {
-        opts = opts || {};
-        const __errorType = opts.errorType,
-            __apiVersion = opts.apiVersion;
-
-        return {
-            validate: function (params, schema, optional, errorType, apiVersion) {
-                errorType = _errorType || __errorType;
-                apiVersion = _apiVersion || __apiVersion;
-                return validate(params, schema, optional, errorType, apiVersion);
-            }
-        };
-    }
 
     function attach(object) {
         // Set hidden flag to determine if object has been validated
@@ -305,9 +285,9 @@ function createValidProps() {
         });
 
         // Replace all properties with getters, throw an error if not validated
-        Object.keys(object).forEach(function (key) {
+        Object.keys(object).forEach(function(key) {
             const property = object[key];
-            object.__defineGetter__(key, function () {
+            object.__defineGetter__(key, function() {
                 if (!this.__validated) {
                     throw new Error('This object has not been validated');
                 }
@@ -317,7 +297,7 @@ function createValidProps() {
 
         // Validate the object and set the internal flag
         Object.defineProperty(object, 'validate', {
-            value: function (schema, optional) {
+            value: function(schema, optional) {
                 this.__validated = true;
                 return validate(object, schema, optional);
             },
@@ -329,10 +309,13 @@ function createValidProps() {
 
     return {
         attach,
-        create,
         validate,
         setVerbose,
     };
 }
 
-module.exports = createValidProps();
+module.exports = (function() {
+    const props = createValidProps();
+    props.create = createValidProps;
+    return props;
+}());

@@ -2,8 +2,6 @@
 
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
-var verbose = false;
-
 var arrayRegex = /\[(string|number|boolean|date|object|array)\]/;
 
 var validTypes = ['string', 'number', 'boolean', 'date', 'object', 'array'];
@@ -174,9 +172,12 @@ function checkPropertiesTypes(params, schema, apiVersion) {
     return cleanParams;
 }
 
-function createValidProps() {
-    var _errorType = undefined,
-        _apiVersion = undefined;
+function createValidProps(opts) {
+    opts = opts || {};
+    var errorType = opts.errorType,
+        apiVersion = opts.apiVersion;
+
+    var verbose = false;
 
     // Public Methods
 
@@ -192,15 +193,7 @@ function createValidProps() {
         verbose = false;
     }
 
-    function _validate(params, schema, optional, errorType, apiVersion) {
-        // If no errorType is specified, check for global errorType
-        if (errorType === undefined) {
-            errorType = _errorType;
-        }
-        if (apiVersion === undefined) {
-            apiVersion = _apiVersion;
-        }
-
+    function validate(params, schema, optional) {
         optional = optional || {};
 
         Object.keys(schema).forEach(function (key) {
@@ -274,20 +267,6 @@ function createValidProps() {
         return cleanParams;
     }
 
-    function create(opts) {
-        opts = opts || {};
-        var __errorType = opts.errorType,
-            __apiVersion = opts.apiVersion;
-
-        return {
-            validate: function validate(params, schema, optional, errorType, apiVersion) {
-                errorType = _errorType || __errorType;
-                apiVersion = _apiVersion || __apiVersion;
-                return _validate(params, schema, optional, errorType, apiVersion);
-            }
-        };
-    }
-
     function attach(object) {
         // Set hidden flag to determine if object has been validated
         Object.defineProperty(object, '__validated', {
@@ -312,7 +291,7 @@ function createValidProps() {
         Object.defineProperty(object, 'validate', {
             value: function value(schema, optional) {
                 this.__validated = true;
-                return _validate(object, schema, optional);
+                return validate(object, schema, optional);
             },
             writable: false,
             enumerable: false,
@@ -322,10 +301,13 @@ function createValidProps() {
 
     return {
         attach: attach,
-        create: create,
-        validate: _validate,
+        validate: validate,
         setVerbose: setVerbose
     };
 }
 
-module.exports = createValidProps();
+module.exports = (function () {
+    var props = createValidProps();
+    props.create = createValidProps;
+    return props;
+})();
