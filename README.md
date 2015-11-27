@@ -8,6 +8,11 @@ environment.
 ## VERSION
 2.0.0
 
+## CHANGES
+In addition to new features, version 2.0.0 changes the default API to reject
+empty arrays and objects. Previously this required setting "apiVersion" to
+greater than 1.5.
+
 ## SYNOPSIS
 Verifies a JavaScript object contains valid pre-defined properties of a given
 type. Useful for web services and other sources of user input to confirm that
