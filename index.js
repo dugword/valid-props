@@ -4,27 +4,24 @@ function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.const
 
 var verbose = false;
 
-var arrayRegex = /\[(string|number|boolean|date|object|array)]/;
+var arrayRegex = /\[(string|number|boolean|date|object|array)\]/;
 
 var validTypes = ['string', 'number', 'boolean', 'date', 'object', 'array'];
 
-function createValidProps() {
-    var checker = {};
+var checker = createChecker();
 
-    var _errorType = undefined,
-        _apiVersion = undefined;
-
+function createChecker() {
     // Casts value as string,
     // this will always be valid unless the string is empty
-    checker.string = function (value) {
+    function string(value) {
         // TODO (Doug): This may not capture everything we want
         if (!value) {
             return null;
         }
         return value.toString();
-    };
+    }
 
-    checker.number = function (value) {
+    function number(value) {
         value = parseFloat(value);
 
         if (isNaN(value)) {
@@ -32,9 +29,9 @@ function createValidProps() {
         }
 
         return value;
-    };
+    }
 
-    checker.date = function (value) {
+    function date(value) {
         value = new Date(value);
 
         if (value.toString() === 'Invalid Date') {
@@ -42,12 +39,13 @@ function createValidProps() {
         }
 
         return value;
-    };
+    }
 
-    checker.array = function (value, apiVersion) {
+    function array(value, apiVersion) {
         if (!Array.isArray(value)) {
             return null;
         }
+
         if (apiVersion >= 1.5) {
             // Reject empty arrays (Why would they pass that?)
             if (!value.length) {
@@ -56,11 +54,12 @@ function createValidProps() {
         }
 
         return value;
-    };
+    }
 
     // TODO (Doug): I'm sure this isn't working right
-    checker.typedArray = function (value, type, apiVersion) {
+    function typedArray(value, type, apiVersion) {
         var cleanArray = [];
+
         if (!Array.isArray(value)) {
             return null;
         }
@@ -85,13 +84,14 @@ function createValidProps() {
         }
 
         return cleanArray;
-    };
+    }
 
     // TODO (Doug): This needs some work
-    checker.object = function (value, apiVersion) {
+    function object(value, apiVersion) {
         if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object') {
             return null;
         }
+
         // Reject empty objects
         if (apiVersion >= 1.5) {
             if (!Object.keys(value).length) {
@@ -100,10 +100,10 @@ function createValidProps() {
         }
 
         return value;
-    };
+    }
 
     // TODO (Doug): May want to re-evaluate this
-    checker.boolean = function (value) {
+    function boolean(value) {
         if (value === undefined || value === null) {
             return null;
         }
@@ -129,45 +129,66 @@ function createValidProps() {
         }
 
         return null;
+    }
+
+    return {
+        string: string,
+        number: number,
+        date: date,
+        array: array,
+        object: object,
+        typedArray: typedArray,
+        boolean: boolean
     };
+}
 
-    // Sets all properties to their clean value or null
-    var checkPropertiesTypes = function checkPropertiesTypes(params, schema, apiVersion) {
-        var cleanParams = {};
+// Sets all properties to their clean value or null
+function checkPropertiesTypes(params, schema, apiVersion) {
+    var cleanParams = {};
 
-        Object.keys(schema).forEach(function (key) {
-            var requiredType = schema[key],
-                value = params[key];
+    Object.keys(schema).forEach(function (key) {
+        var requiredType = schema[key],
+            value = params[key];
 
-            // Don't check properties that don't exist
-            if (!params.hasOwnProperty(key)) {
-                return;
+        // Don't check properties that don't exist
+        if (!params.hasOwnProperty(key)) {
+            return;
+        }
+
+        if (arrayRegex.test(requiredType)) {
+            var arrayType = arrayRegex.exec(requiredType)[1];
+            if (validTypes.indexOf(arrayType) === -1) {
+                throw new Error('Invalid type in schema: ' + arrayType);
             }
+            cleanParams[key] = checker.typedArray(value, arrayType, apiVersion);
+            return;
+        }
 
-            if (arrayRegex.test(requiredType)) {
-                var arrayType = arrayRegex.exec(requiredType)[1];
-                if (validTypes.indexOf(arrayType) === -1) {
-                    throw new Error('Invalid type in schema: ' + arrayType);
-                }
-                cleanParams[key] = checker.typedArray(value, arrayType, apiVersion);
-                return;
-            }
+        if (validTypes.indexOf(requiredType) === -1) {
+            throw new Error('Invalid type in schema: ' + requiredType);
+        }
 
-            if (validTypes.indexOf(requiredType) === -1) {
-                throw new Error('Invalid type in schema: ' + requiredType);
-            }
+        cleanParams[key] = checker[requiredType](value, apiVersion);
+    });
 
-            cleanParams[key] = checker[requiredType](value, apiVersion);
-        });
+    return cleanParams;
+}
 
-        return cleanParams;
-    };
+function createValidProps() {
+    var _errorType = undefined,
+        _apiVersion = undefined;
 
     // Public Methods
 
     function setVerbose(flag) {
-        if (flag === undefined) return verbose = true;
-        if (flag) return verbose = true;
+        if (flag === undefined) {
+            verbose = true;
+            return;
+        }
+        if (flag) {
+            verbose = true;
+            return;
+        }
         verbose = false;
     }
 
@@ -179,9 +200,6 @@ function createValidProps() {
         if (apiVersion === undefined) {
             apiVersion = _apiVersion;
         }
-
-        var cleanParams = {},
-            cleanOptionalParams = {};
 
         optional = optional || {};
 
@@ -210,7 +228,7 @@ function createValidProps() {
         }
 
         // Check that every required property is of the required type
-        cleanParams = checkPropertiesTypes(params, schema, apiVersion);
+        var cleanParams = checkPropertiesTypes(params, schema, apiVersion);
         var incorrectTypes = Object.keys(cleanParams).filter(function (key) {
             return cleanParams[key] === null;
         });
@@ -227,7 +245,7 @@ function createValidProps() {
         }
 
         // Check that every optional request is of the required type
-        cleanOptionalParams = checkPropertiesTypes(params, optional, apiVersion);
+        var cleanOptionalParams = checkPropertiesTypes(params, optional, apiVersion);
         var incorrectOptionalTypes = Object.keys(cleanOptionalParams).filter(function (key) {
             return cleanOptionalParams[key] === null;
         });
@@ -283,7 +301,9 @@ function createValidProps() {
         Object.keys(object).forEach(function (key) {
             var property = object[key];
             object.__defineGetter__(key, function () {
-                if (!this.__validated) throw new Error('This object has not been validated');
+                if (!this.__validated) {
+                    throw new Error('This object has not been validated');
+                }
                 return property;
             });
         });

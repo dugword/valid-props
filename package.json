@@ -31,6 +31,7 @@
     "chai": "^1.10.0",
     "gulp": "^3.9.0",
     "gulp-babel": "^6.1.0",
+    "jscs": "^2.6.0",
     "mocha": "^2.1.0"
   },
   "tonicExampleFilename": "tonic-example.js"
