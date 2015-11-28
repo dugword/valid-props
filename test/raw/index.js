@@ -12,7 +12,8 @@ self.all = {
     },
     myDate: new Date(),
     myTrue: true,
-    myFalse: false
+    myFalse: false,
+    myCustom: 'Twilight Sparkle',
 };
 
 self.string = {

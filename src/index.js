@@ -3,11 +3,14 @@
 const standardTypes = require('./standard-types');
 
 function checkPropertyType(typeName, value, types, opts) {
-    console.log('typeName =>', typeName);
-    console.log('value =>', value);
-    console.log('types =>', types);
-    console.log('opts =>', opts);
-    const func = types[typeName];
+    // TODO (Doug): Not checking types yet
+    const isArray = /\[(\w+)\]/.exec(typeName);
+
+    if (isArray) {
+        typeName = isArray[1];
+    }
+
+    const func = typeof typeName === 'function' ? typeName : types[typeName];
 
     let result;
 
@@ -16,6 +19,12 @@ function checkPropertyType(typeName, value, types, opts) {
     }
 
     try {
+        if (isArray) {
+            result = [];
+            value.forEach(item => {
+                result.push(func(item));
+            });
+        }
         result = func(value);
     }
 
@@ -27,7 +36,7 @@ function checkPropertyType(typeName, value, types, opts) {
         throw new Error(`Invalid value: ${value} for type: ${typeName}`);
     }
 
-    if (typeof result === 'object' && result.valid) {
+    if (typeof result === 'object' && result.hasOwnProperty('valid')) {
         if (result.valid) {
             if (!opts.strict && result.newValue) {
                 return result.newValue;
@@ -82,13 +91,15 @@ function verifyPropertiesExist(params, schema) {
 }
 
 function createValidProps(opts) {
-    const types = [],
-        schemas = [];
+    const types = {},
+        schemas = {};
+
+    use(standardTypes);
 
     opts = opts || {};
 
-    let errorType = opts.errorType,
-        apiVersion = opts.apiVersion;
+    let errorType = opts.errorType;
+        // apiVersion = opts.apiVersion;
 
     let verbose = false;
 
@@ -107,13 +118,17 @@ function createValidProps(opts) {
     }
 
     function validate(params, schema, optional) {
-        console.log('types =>', types);
         try {
             optional = optional || {};
 
+            if (typeof schema === 'string') {
+                schema = schemas[schema].schema;
+                optional = schemas[schema].optionalSchema;
+            }
+
             // Move all optional properties to the optional object
             Object.keys(schema).forEach(function (key) {
-                if (schema[key].slice(-1) === '?') {
+                if (typeof schema[key] === 'string' && schema[key].slice(-1) === '?') {
                     optional[key] = schema[key].slice(0, -1);
                     delete schema[key];
                 }
@@ -122,12 +137,12 @@ function createValidProps(opts) {
             verifyPropertiesExist(params, schema);
 
             // Check that every required property is of the required type
-            const checkedParams = checkPropertiesTypes(params, schema);
+            const checkedParams = checkPropertiesTypes(params, schema, types, opts);
             const validParams = checkedParams.valid;
             const invalidParams = checkedParams.invalid;
 
             // Check that every optional request is of the required type
-            const checkedOptionalParams = checkPropertiesTypes(params, optional, types);
+            const checkedOptionalParams = checkPropertiesTypes(params, optional, types, opts);
             const validOptionalParams = checkedOptionalParams.valid;
             const invalidOptionalParams = checkedOptionalParams.invalid;
 
@@ -160,6 +175,10 @@ function createValidProps(opts) {
             return validParams;
         }
         catch (err) {
+            if (errorType === 'returnNull') {
+                return null;
+            }
+
             throw err;
         }
     }
@@ -198,33 +217,29 @@ function createValidProps(opts) {
     }
 
     function use(plugin) {
-        console.log('use =>', plugin);
         Object.keys(plugin).forEach(name => {
             registerType(name, plugin[name]);
         });
     }
 
     function registerType(name, func) {
-        console.log('registerType =>', name);
-        console.log('func =>', func.toString());
-        const type = {};
-        type[name] = func;
-        types.push(type);
+        types[name] = func;
     }
 
     function registerSchema(name, schema, optionalSchema) {
-        schemas.push({
-            name, schema, optionalSchema
-        });
+        schemas[name] = {
+            schema, optionalSchema
+        };
     }
 
     return {
         attach,
-        validate,
-        setVerbose,
-        registerType,
-        registerSchema,
-        use,
+        create: createValidProps,
+            validate,
+            setVerbose,
+            registerType,
+            registerSchema,
+            use,
     };
 }
 
@@ -244,9 +259,4 @@ function createValidProps(opts) {
     }});
 */
 
-module.exports = (function () {
-    const props = createValidProps();
-    props.use(standardTypes);
-    props.create = createValidProps;
-    return props;
-}());
+module.exports = createValidProps();

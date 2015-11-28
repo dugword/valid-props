@@ -1,18 +1,21 @@
 'use strict';
 
-var assert = require('assert'),
-    props = require('../'),
-    expect = require('chai').expect,
-    raw = require('./raw');
+/* jshint -W030 */
+
+const props = require('../'),
+    should = require('chai').should,
+    expect = require('chai').expect;
+should();
 
 describe('Confirm valid object', function () {
-    var validator = props.create({
-        errorType: 'throw',
-    });
 
-    it('valid should not be null', function () {
+    it('invalid should not throw', () => {
+        const nullValidator = props.create({
+            errorType: 'returnNull',
+        });
 
-        var valid = props.validate({}, {
+        let params;
+        expect(params = nullValidator.validate({}, {
             myString: 'string',
             myNumber: 'number',
             myArray: 'array',
@@ -21,14 +24,18 @@ describe('Confirm valid object', function () {
             myDate: 'date',
             myTrue: 'boolean',
             myFalse: 'boolean'
-        });
-        expect(valid).to.be.null();
+        })).to.not.throw;
+
+        expect(params).to.be.null;
     });
 
-    it('invalid error message should be invalid', function () {
-        var errorMessage = '';
-        try {
-            var invalid = validator.validate({}, {
+    it('invalid error message should be invalid', () => {
+        const throwValidator = props.create({
+            errorType: 'throw',
+        });
+
+        expect(() => {
+            throwValidator.validate({}, {
                 myString: 'string',
                 myNumber: 'number',
                 myArray: 'array',
@@ -38,18 +45,14 @@ describe('Confirm valid object', function () {
                 myTrue: 'boolean',
                 myFalse: 'boolean'
             });
-        }
-        catch (e) {
-            errorMessage = e.message;
-        }
-        expect(errorMessage).to.equal('Missing properties: myString, myNumber, myArray, myTypedArray, myObject, myDate, myTrue, myFalse');
+        }).to.throw(/Missing properties/);
     });
 
-    it('valid obj should be valid when error type is throw', function () {
+    it('valid obj should be valid when error type is throw', () => {
 
-        var validThrow;
+        let validThrow;
         try {
-            validThrow = validator.validate({
+            validThrow = props.validate({
                 myString: 'string',
                 myNumber: '42',
                 myArray: ['array'],
@@ -72,11 +75,12 @@ describe('Confirm valid object', function () {
             });
         }
         catch (err) {
+            console.error('err', err);
+            console.error('validThrow', validThrow);
         }
 
-        expect(validThrow).to.not.be.null();
-        expect(validThrow).to.not.be.undefined();
+        expect(validThrow).to.not.be.null;
+        expect(validThrow).to.not.be.undefined;
     });
-
 
 });

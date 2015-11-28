@@ -6,85 +6,135 @@ module.exports = {
         value = parseFloat(value);
 
         if (isNaN(value)) {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
-        return value;
+        return {
+            valid: true,
+            value: value,
+        };
     },
 
     string: function (value) {
         if (value === undefined || value === null) {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
-        return value.toString();
+        return {
+            valid: true,
+            value: value.toString(),
+        };
     },
 
     date: function (value) {
         value = new Date(value);
 
         if (value.toString() === 'Invalid Date') {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
-        return value;
+        return {
+            valid: true,
+            value: value,
+        };
     },
 
     array: function (value) {
         if (!Array.isArray(value)) {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
         // Reject empty arrays (Why would they pass that?)
         if (!value.length) {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
-        return value;
+        return {
+            valid: true,
+            value: value,
+        };
     },
 
     object: function (value) {
         if (typeof value !== 'object') {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
         if (value === null) {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
         // Reject empty objects
         if (!Object.keys(value).length) {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
-        return value;
+        return {
+            valid: true,
+            value: value,
+        };
     },
 
     boolean: function (value) {
         if (value === undefined || value === null) {
-            return null;
+            return {
+                valid: false,
+            };
         }
 
         if (typeof value === 'boolean') {
-            return value;
+            return {
+                valid: true,
+                value: value,
+            };
         }
 
         if (value === 1 || value === '1') {
-            return true;
+            return {
+                valid: true,
+                value: true,
+            };
         }
 
         if (value === 0 || value === '0') {
-            return false;
+            return {
+                valid: true,
+                value: false,
+            };
         }
 
         if (/^true$/i.test(value)) {
-            return true;
+            return {
+                valid: true,
+                value: true,
+            };
         }
 
         if (/^false$/i.test(value)) {
-            return false;
+            return {
+                valid: true,
+                value: false,
+            };
         }
 
-        return null;
+        return {
+            valid: false,
+        };
     },
 };

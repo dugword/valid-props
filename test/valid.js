@@ -1,13 +1,14 @@
 'use strict';
 
-var assert = require('assert'),
-    props = require('../'),
+/* jshint -W030 */
+
+const props = require('../').create({errorType: 'returnNull'}),
     expect = require('chai').expect,
     raw = require('./raw');
 
 describe('Confirm valid object', function () {
 
-    var valid = props.validate(raw.all, {
+    const valid = props.validate(raw.all, {
         myString: 'string',
         myNumber: 'number',
         myArray: 'array',
@@ -19,19 +20,19 @@ describe('Confirm valid object', function () {
     });
 
     it('valid should not be null', function () {
-        expect(valid).to.not.be.null();
+        expect(valid).to.not.be.null;
     });
 
     it('valid.myString should be a string', function () {
-        expect(valid.myString).to.be.a('string');
+        expect(valid.myString).to.be.a.string;
     });
 
     it('valid.myNumber should be a number', function () {
-        expect(valid.myNumber).to.be.a('number');
+        expect(valid.myNumber).to.be.a.number;
     });
 
     it('valid.myArray should be an array', function () {
-        expect(valid.myArray).to.be.an('array');
+        expect(valid.myArray).to.be.an.array;
     });
 
     it('valid.myTypedArray should be an array of numbers', function () {
@@ -39,7 +40,7 @@ describe('Confirm valid object', function () {
     });
 
     it('valid.myObject should be an object', function () {
-        expect(valid.myObject).to.be.an('object');
+        expect(valid.myObject).to.be.an.object;
     });
 
     it('valid.myDate should be a date', function () {
@@ -47,10 +48,10 @@ describe('Confirm valid object', function () {
     });
 
     it('valid.myTrue should be true', function () {
-        expect(valid.myTrue).to.be.true();
+        expect(valid.myTrue).to.be.true;
     });
 
     it('valid.myFalse should be false', function () {
-        expect(valid.myFalse).to.be.false();
+        expect(valid.myFalse).to.be.false;
     });
 });

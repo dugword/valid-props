@@ -1,18 +1,20 @@
 'use strict';
 
-var assert = require('assert'),
-    props = require('../'),
-    expect = require('chai').expect,
+/* jshint -W030 */
+
+const props = require('../').create(),
+    should = require('chai').should,
     raw = require('./raw');
+should();
 
 describe('Confirm valid object', function () {
-    var res = {
+    const res = {
         body: raw.all
     };
 
     props.attach(res.body);
 
-    var valid = raw.all.validate({
+    const valid = raw.all.validate({
         myString: 'string',
         myNumber: 'number',
         myArray: 'array',
@@ -20,42 +22,48 @@ describe('Confirm valid object', function () {
         myObject: 'object',
         myDate: 'date',
         myTrue: 'boolean',
-        myFalse: 'boolean'
+        myFalse: 'boolean',
+        myCustom: value => /twilight\ssparkle/i.test(value),
     });
 
-    it('valid should not be null', function () {
-        expect(valid).to.not.be.null();
+    it('valid should not be null', () => {
+        valid.should.not.be.null;
     });
 
-    it('valid.myString should be a string', function () {
-        expect(valid.myString).to.be.a('string');
+    it('valid.myString should be a string', () => {
+        valid.myString.should.be.a.string;
     });
 
-    it('valid.myNumber should be a number', function () {
-        expect(valid.myNumber).to.be.a('number');
+    it('valid.myNumber should be a number', () => {
+        valid.myNumber.should.be.a.number;
     });
 
-    it('valid.myArray should be an array', function () {
-        expect(valid.myArray).to.be.an('array');
+    it('valid.myArray should be an array', () => {
+        valid.myArray.should.be.an.array;
     });
 
-    it('valid.myTypedArray should be an array of numbers', function () {
-        expect(valid.myTypedArray).to.have.members([24, 13, 30, 1337]);
+    it('valid.myTypedArray should be an array of numbers', () => {
+        valid.myTypedArray.should.have.members([
+            24,
+            13,
+            30,
+            1337,
+        ]);
     });
 
-    it('valid.myObject should be an object', function () {
-        expect(valid.myObject).to.be.an('object');
+    it('valid.myObject should be an object', () => {
+        valid.myObject.should.be.an.object;
     });
 
-    it('valid.myDate should be a date', function () {
-        expect(valid.myDate).to.be.an.instanceof(Date);
+    it('valid.myDate should be a date', () => {
+        valid.myDate.should.be.an.instanceof(Date);
     });
 
-    it('valid.myTrue should be true', function () {
-        expect(valid.myTrue).to.be.true();
+    it('valid.myTrue should be true', () => {
+        valid.myTrue.should.be.true;
     });
 
-    it('valid.myFalse should be false', function () {
-        expect(valid.myFalse).to.be.false();
+    it('valid.myFalse should be false', () => {
+        valid.myFalse.should.be.false;
     });
 });

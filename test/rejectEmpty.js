@@ -1,9 +1,7 @@
 'use strict';
 
 var assert = require('assert'),
-    props = require('../').create({
-        apiVersion: 1.5
-    }),
+    props = require('../').create({errorType: 'returnNull'}),
     expect = require('chai').expect,
     raw = require('./raw');
 
@@ -15,8 +13,8 @@ describe('Reject empty arrays and objects', function() {
             foo: 'array'
         });
 
-        expect(valid).to.not.be.null();
-        expect(valid.foo).to.be.an('array');
+        expect(valid).to.not.be.null;
+        expect(valid.foo).to.be.an.array;
 
         let invalid = props.validate({
             foo: []
@@ -24,6 +22,6 @@ describe('Reject empty arrays and objects', function() {
             foo: 'array'
         });
 
-        expect(invalid).to.be.null();
+        expect(invalid).to.be.null;
     });
 });

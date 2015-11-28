@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert'),
-    props = require('../'),
+    props = require('../').create({errorType: 'returnNull'}),
     expect = require('chai').expect,
     raw = require('./raw');
 

@@ -1,33 +1,42 @@
 'use strict';
 
-const standardTypes = require('./standard-types');
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
+var standardTypes = require('./standard-types');
 
 function checkPropertyType(typeName, value, types, opts) {
-    console.log('typeName =>', typeName);
-    console.log('value =>', value);
-    console.log('types =>', types);
-    console.log('opts =>', opts);
-    const func = types[typeName];
+    // TODO (Doug): Not checking types yet
+    var isArray = /\[(\w+)\]/.exec(typeName);
 
-    let result;
+    if (isArray) {
+        typeName = isArray[1];
+    }
+
+    var func = typeof typeName === 'function' ? typeName : types[typeName];
+
+    var result = undefined;
 
     if (func === undefined) {
-        throw new Error(`Invalid type: ${typeName}`);
+        throw new Error('Invalid type: ' + typeName);
     }
 
     try {
+        if (isArray) {
+            result = [];
+            value.forEach(function (item) {
+                result.push(func(item));
+            });
+        }
         result = func(value);
-    }
-
-    catch (err) {
-        throw new Error(`Invalid value: ${value} for type: ${typeName}`);
+    } catch (err) {
+        throw new Error('Invalid value: ' + value + ' for type: ' + typeName);
     }
 
     if (result === undefined || result === false || result === null) {
-        throw new Error(`Invalid value: ${value} for type: ${typeName}`);
+        throw new Error('Invalid value: ' + value + ' for type: ' + typeName);
     }
 
-    if (typeof result === 'object' && result.valid) {
+    if ((typeof result === 'undefined' ? 'undefined' : _typeof(result)) === 'object' && result.hasOwnProperty('valid')) {
         if (result.valid) {
             if (!opts.strict && result.newValue) {
                 return result.newValue;
@@ -35,7 +44,7 @@ function checkPropertyType(typeName, value, types, opts) {
             return value;
         }
 
-        throw new Error(`Invalid value for: ${typeName}`);
+        throw new Error('Invalid value for: ' + typeName);
     }
 
     return value;
@@ -43,12 +52,12 @@ function checkPropertyType(typeName, value, types, opts) {
 
 // Sets all properties to their clean value or null
 function checkPropertiesTypes(params, schema, types, opts) {
-    const valid = {},
+    var valid = {},
         invalid = {};
 
-    Object.keys(schema).forEach(propertyName => {
+    Object.keys(schema).forEach(function (propertyName) {
 
-        const typeName = schema[propertyName],
+        var typeName = schema[propertyName],
             value = params[propertyName];
 
         // Don't check optional properties that don't exist
@@ -58,39 +67,40 @@ function checkPropertiesTypes(params, schema, types, opts) {
 
         try {
             valid[propertyName] = checkPropertyType(typeName, value, types, opts);
-        }
-        catch (err) {
+        } catch (err) {
             invalid[propertyName] = err;
         }
     });
 
     return {
-        valid,
-        invalid,
+        valid: valid,
+        invalid: invalid
     };
 }
 
 function verifyPropertiesExist(params, schema) {
-    const missingProperties = Object.keys(schema).filter(function (key) {
+    var missingProperties = Object.keys(schema).filter(function (key) {
         return !params.hasOwnProperty([key]);
     });
 
     if (missingProperties.length) {
-        let errorMsg = 'Missing properties: ' + missingProperties.join(', ');
+        var errorMsg = 'Missing properties: ' + missingProperties.join(', ');
         throw new Error(errorMsg);
     }
 }
 
 function createValidProps(opts) {
-    const types = [],
-        schemas = [];
+    var types = {},
+        schemas = {};
+
+    use(standardTypes);
 
     opts = opts || {};
 
-    let errorType = opts.errorType,
-        apiVersion = opts.apiVersion;
+    var errorType = opts.errorType;
+    // apiVersion = opts.apiVersion;
 
-    let verbose = false;
+    var verbose = false;
 
     // Public Methods
 
@@ -107,63 +117,74 @@ function createValidProps(opts) {
     }
 
     function validate(params, schema, optional) {
-        console.log('types =>', types);
         try {
-            optional = optional || {};
+            var _ret = (function () {
+                optional = optional || {};
 
-            // Move all optional properties to the optional object
-            Object.keys(schema).forEach(function (key) {
-                if (schema[key].slice(-1) === '?') {
-                    optional[key] = schema[key].slice(0, -1);
-                    delete schema[key];
+                if (typeof schema === 'string') {
+                    schema = schemas[schema].schema;
+                    optional = schemas[schema].optionalSchema;
                 }
-            });
 
-            verifyPropertiesExist(params, schema);
-
-            // Check that every required property is of the required type
-            const checkedParams = checkPropertiesTypes(params, schema);
-            const validParams = checkedParams.valid;
-            const invalidParams = checkedParams.invalid;
-
-            // Check that every optional request is of the required type
-            const checkedOptionalParams = checkPropertiesTypes(params, optional, types);
-            const validOptionalParams = checkedOptionalParams.valid;
-            const invalidOptionalParams = checkedOptionalParams.invalid;
-
-            // Join the valid optional params to the valid required types
-            Object.keys(validOptionalParams).forEach(function (key) {
-                validParams[key] = validOptionalParams[key];
-            });
-
-            // Join the invalid optional params to the invalid required types
-            Object.keys(invalidOptionalParams).forEach(function (key) {
-                invalidParams[key] = invalidOptionalParams[key];
-            });
-
-            if (Object.keys(invalidParams).length) {
-                let errorMessage;
-
-                Object.keys(invalidParams).forEach(propertyName => {
-                    errorMessage += invalidParams[propertyName] + '\n';
+                // Move all optional properties to the optional object
+                Object.keys(schema).forEach(function (key) {
+                    if (typeof schema[key] === 'string' && schema[key].slice(-1) === '?') {
+                        optional[key] = schema[key].slice(0, -1);
+                        delete schema[key];
+                    }
                 });
 
-                throw new Error(errorMessage);
+                verifyPropertiesExist(params, schema);
+
+                // Check that every required property is of the required type
+                var checkedParams = checkPropertiesTypes(params, schema, types, opts);
+                var validParams = checkedParams.valid;
+                var invalidParams = checkedParams.invalid;
+
+                // Check that every optional request is of the required type
+                var checkedOptionalParams = checkPropertiesTypes(params, optional, types, opts);
+                var validOptionalParams = checkedOptionalParams.valid;
+                var invalidOptionalParams = checkedOptionalParams.invalid;
+
+                // Join the valid optional params to the valid required types
+                Object.keys(validOptionalParams).forEach(function (key) {
+                    validParams[key] = validOptionalParams[key];
+                });
+
+                // Join the invalid optional params to the invalid required types
+                Object.keys(invalidOptionalParams).forEach(function (key) {
+                    invalidParams[key] = invalidOptionalParams[key];
+                });
+
+                if (Object.keys(invalidParams).length) {
+                    var errorMessage = undefined;
+
+                    Object.keys(invalidParams).forEach(function (propertyName) {
+                        errorMessage += invalidParams[propertyName] + '\n';
+                    });
+
+                    throw new Error(errorMessage);
+                }
+
+                // TODO: This was a bugfix, needs a test
+                if (Object.keys(validParams).length === 0) {
+                    throw new Error('No valid properties');
+                }
+
+                return {
+                    v: validParams
+                };
+            })();
+
+            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+        } catch (err) {
+            if (errorType === 'returnNull') {
+                return null;
             }
 
-
-            // TODO: This was a bugfix, needs a test
-            if (Object.keys(validParams).length === 0) {
-                throw new Error('No valid properties');
-            }
-
-            return validParams;
-        }
-        catch (err) {
             throw err;
         }
     }
-
 
     function attach(object) {
         // Set hidden flag to determine if object has been validated
@@ -176,7 +197,7 @@ function createValidProps(opts) {
 
         // Replace all properties with getters, throw an error if not validated
         Object.keys(object).forEach(function (key) {
-            const property = object[key];
+            var property = object[key];
             object.__defineGetter__(key, function () {
                 if (!this.__validated) {
                     throw new Error('This object has not been validated');
@@ -187,7 +208,7 @@ function createValidProps(opts) {
 
         // Validate the object and set the internal flag
         Object.defineProperty(object, 'validate', {
-            value: function (schema, optional) {
+            value: function value(schema, optional) {
                 this.__validated = true;
                 return validate(object, schema, optional);
             },
@@ -198,36 +219,31 @@ function createValidProps(opts) {
     }
 
     function use(plugin) {
-        console.log('use =>', plugin);
-        Object.keys(plugin).forEach(name => {
+        Object.keys(plugin).forEach(function (name) {
             registerType(name, plugin[name]);
         });
     }
 
     function registerType(name, func) {
-        console.log('registerType =>', name);
-        console.log('func =>', func.toString());
-        const type = {};
-        type[name] = func;
-        types.push(type);
+        types[name] = func;
     }
 
     function registerSchema(name, schema, optionalSchema) {
-        schemas.push({
-            name, schema, optionalSchema
-        });
+        schemas[name] = {
+            schema: schema, optionalSchema: optionalSchema
+        };
     }
 
     return {
-        attach,
-        validate,
-        setVerbose,
-        registerType,
-        registerSchema,
-        use,
+        attach: attach,
+        create: createValidProps,
+        validate: validate,
+        setVerbose: setVerbose,
+        registerType: registerType,
+        registerSchema: registerSchema,
+        use: use
     };
 }
-
 
 /*
     props.registerType('number', function () {
@@ -244,9 +260,4 @@ function createValidProps(opts) {
     }});
 */
 
-module.exports = (function () {
-    const props = createValidProps();
-    props.use(standardTypes);
-    props.create = createValidProps;
-    return props;
-}());
+module.exports = createValidProps();
