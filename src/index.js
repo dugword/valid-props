@@ -166,7 +166,6 @@ function createValidProps(opts) {
                 throw new Error(errorMessage);
             }
 
-
             // TODO: This was a bugfix, needs a test
             if (Object.keys(validParams).length === 0) {
                 throw new Error('No valid properties');
