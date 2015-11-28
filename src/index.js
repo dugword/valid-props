@@ -3,6 +3,10 @@
 const standardTypes = require('./standard-types');
 
 function checkPropertyType(typeName, value, types, opts) {
+    console.log('typeName =>', typeName);
+    console.log('value =>', value);
+    console.log('types =>', types);
+    console.log('opts =>', opts);
     const func = types[typeName];
 
     let result;
@@ -103,6 +107,7 @@ function createValidProps(opts) {
     }
 
     function validate(params, schema, optional) {
+        console.log('types =>', types);
         try {
             optional = optional || {};
 
@@ -138,9 +143,11 @@ function createValidProps(opts) {
 
             if (Object.keys(invalidParams).length) {
                 let errorMessage;
+
                 Object.keys(invalidParams).forEach(propertyName => {
                     errorMessage += invalidParams[propertyName] + '\n';
                 });
+
                 throw new Error(errorMessage);
             }
 
@@ -191,12 +198,15 @@ function createValidProps(opts) {
     }
 
     function use(plugin) {
+        console.log('use =>', plugin);
         Object.keys(plugin).forEach(name => {
             registerType(name, plugin[name]);
         });
     }
 
     function registerType(name, func) {
+        console.log('registerType =>', name);
+        console.log('func =>', func.toString());
         const type = {};
         type[name] = func;
         types.push(type);
