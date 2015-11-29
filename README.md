@@ -1,7 +1,7 @@
 ![valid-props logo](/images/logo.png) valid-props
 ===========
 
-The ultra lightweight, dependency free, flexible, extensible, property
+The ultra lightweight, dependency free, flexible, extensible, object property
 validator with a simple succinct interface that runs in any ES5 compatible
 environment.
 
@@ -13,10 +13,14 @@ In addition to new features, version 2.0.0 changes the default API to reject
 empty arrays and objects. Previously this required setting "apiVersion" to
 greater than 1.5.
 
+Valid Props also throws errors by default when objects with invalid schemas
+are validated. The version 1.x behaviour can be restored by setting the
+errorType to 'returnNull'.
+
 ## SYNOPSIS
 Verifies a JavaScript object contains valid pre-defined properties of a given
-type. Useful for web services and other sources of user input to confirm that
-objects contain the expected information.
+type. Useful for web services, API end points, and other sources of user input
+to confirm that objects contain the expected information.
 
 ## METHODS
 The valid-props module contains these methods:
@@ -36,8 +40,9 @@ The `validate` method accepts an object as the first parameter and compares it
 to the schema object in the second parameter.
 
 All the properties declared in the schema are required. If the object being
-checked is missing a property or the property is of a different type the value
-"null" will be returned.
+checked is missing a property or the property is of a different type an error
+will be thrown. If the errorType is set to "returnNull" the value "null" will be
+returned instead.
 
 If the object contains all the properties of the correct type then a new object
 is returned with those properties. Any additional undeclared properties from
@@ -46,7 +51,8 @@ the original object are not returned.
 If an optional schema is given, the method will do nothing if the optional
 property is not included in the object. If the property is present and of the
 correct type it will be returned with the resultant object. If the optional
-property is of the incorrect type the entire return value will be null.
+property is of the incorrect type an error will be thrown or the entire return
+value will be null (depending on the current setting of "errorType")
 
 NOTE: The validate method will do type coercion beyond what JavaScript does and
 returns the specified type in the result object. E.g the string `"False"` will
@@ -64,6 +70,26 @@ attached and only accepts schema and opitonalschema arguments.
 Accessing any properties on the object with throw an error until the validate
 function is called. In frameworks like Express this can be set in a middleware
 function forcing all routes to validate request parameters.
+
+The `registerType` method allows you to create new types that you can declare
+in your schema. The method's first argument is a string which is the name of
+the new type, the second argument is a function that takes one argument `value`
+which is the value to be checked. If the function returns a truth value is
+accepted and returned, otherwise the value is rejected and an error is thrown.
+
+The function passed to registerType will be called in a try block, and if an
+error is thrown the value will also be rejected.
+
+The `registerSchema` method allows you to create a new schema that can be called
+by name in subsequent calls.
+
+The `use` method accepts an object with a series of properties with function
+values. The names of these properties become types that can be checked against,
+using the function value attached to them. Many other string validators on NPM
+will just work when passed into this method.
+
+The 'createSchemaValidator` accepts a schema object and optional schema object,
+and returns a function that will validate objects against that schema.
 
 ## EXAMPLE
 
