@@ -6,15 +6,16 @@ var standardTypes = require('./standard-types'),
     check = require('./check'),
     verify = require('./verify');
 
-function createValidProps(opts) {
+function create(opts) {
     var self = {
         attach: attach,
-        create: createValidProps,
+        createSchemaValidator: createSchemaValidator,
         validate: validate,
         setVerbose: setVerbose,
         registerType: registerType,
         registerSchema: registerSchema,
-        use: use
+        use: use,
+        create: create
     };
 
     var types = {},
@@ -163,7 +164,13 @@ function createValidProps(opts) {
         return self;
     }
 
+    function createSchemaValidator(schema, optional) {
+        return function schemaValidator(params) {
+            return validate(params, schema, optional);
+        };
+    }
+
     return self;
 }
 
-module.exports = createValidProps();
+module.exports = create();

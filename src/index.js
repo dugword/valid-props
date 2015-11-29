@@ -1,18 +1,19 @@
 'use strict';
 
 const standardTypes = require('./standard-types'),
-      check = require('./check'),
-      verify = require('./verify');
+    check = require('./check'),
+    verify = require('./verify');
 
-function createValidProps(opts) {
+function create(opts) {
     const self = {
         attach,
-        create: createValidProps,
-            validate,
-            setVerbose,
-            registerType,
-            registerSchema,
-            use,
+        createSchemaValidator,
+        validate,
+        setVerbose,
+        registerType,
+        registerSchema,
+        use,
+        create,
     };
 
     const types = {},
@@ -156,7 +157,13 @@ function createValidProps(opts) {
         return self;
     }
 
+    function createSchemaValidator(schema, optional) {
+        return function schemaValidator(params) {
+            return validate(params, schema, optional);
+        };
+    }
+
     return self;
 }
 
-module.exports = createValidProps();
+module.exports = create();

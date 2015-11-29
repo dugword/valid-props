@@ -27,6 +27,7 @@ The valid-props module contains these methods:
     registerSchema(name, schema [,optionalSchema])
     use(plugin)
     validate(object, schema [,optionalSchema])
+    createSchemaValidator(schema [,optionalSchema])
 
 The `create` method returns a new instance of the valid-props object with
 the behaviour defined by the `options` object.
@@ -153,6 +154,19 @@ function forcing all routes to validate request parameters.
     catch (e) {
         console.error(e.message); // 'Invalid type: array'
     }
+
+    // Example 5: Create a new validator function for specific schemas
+    var schemaValidator = require('valid-props').createSchemaValidator({
+    	myString: 'string'
+    });
+
+    try {
+        var valid = schemaValidator({ myString: 'This is a string' });
+    }
+    catch (e) {
+        console.error(e.message); // Valid object, won't throw
+    }
+
 
 # TYPES
 - string
