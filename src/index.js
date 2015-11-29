@@ -1,10 +1,8 @@
 'use strict';
 
-module.exports = createValidProps();
-
 const standardTypes = require('./standard-types'),
-      checker = require('./checker'),
-      verifyExist = require('verifyExist');
+      check = require('./check'),
+      verify = require('./verify');
 
 function createValidProps(opts) {
     const self = {
@@ -56,15 +54,15 @@ function createValidProps(opts) {
                 }
             });
 
-            verifyPropertiesExist(params, schema);
+            verify.propertiesExist(params, schema);
 
             // Check that every required property is of the required type
-            const checkedParams = checkPropertiesTypes(params, schema, types, opts);
+            const checkedParams = check.propertiesTypes(params, schema, types, opts);
             const validParams = checkedParams.valid;
             const invalidParams = checkedParams.invalid;
 
             // Check that every optional request is of the required type
-            const checkedOptionalParams = checkPropertiesTypes(params, optional, types, opts);
+            const checkedOptionalParams = check.propertiesTypes(params, optional, types, opts);
             const validOptionalParams = checkedOptionalParams.valid;
             const invalidOptionalParams = checkedOptionalParams.invalid;
 
@@ -160,3 +158,5 @@ function createValidProps(opts) {
 
     return self;
 }
+
+module.exports = createValidProps();

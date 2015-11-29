@@ -74,3 +74,6 @@ function checkPropertiesTypes(params, schema, types, opts) {
     };
 }
 
+module.exports = {
+    propertiesTypes: checkPropertiesTypes,
+};

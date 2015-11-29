@@ -10,3 +10,7 @@ function verifyPropertiesExist(params, schema) {
         throw new Error(errorMsg);
     }
 }
+
+module.exports = {
+    propertiesExist: verifyPropertiesExist,
+};
