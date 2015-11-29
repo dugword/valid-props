@@ -144,19 +144,34 @@ function create(opts) {
 
     function use(plugin) {
         Object.keys(plugin).forEach(function (name) {
-            registerType(name, plugin[name]);
+            var func = plugin[name];
+
+            // Fail safe when importing plugins
+            if (typeof func !== 'function' || func.length !== 1) {
+                return console.error('Failed to register type ' + name);
+            }
+
+            registerType(name, func);
         });
 
         return self;
     }
 
     function registerType(name, func) {
+        if (typeof func !== 'function' || func.length !== 1) {
+            throw new Error('Failed to register type ' + name);
+        }
+
         types[name] = func;
 
         return self;
     }
 
     function registerSchema(name, schema, optionalSchema) {
+        if (typeof name !== 'string') {
+            throw new Error('Failed to register schema: ' + name);
+        }
+
         schemas[name] = {
             schema: schema, optionalSchema: optionalSchema
         };
