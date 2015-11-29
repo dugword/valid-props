@@ -3,13 +3,11 @@
 /* jshint -W030 */
 
 const props = require('../'),
-    should = require('chai').should,
     expect = require('chai').expect;
-should();
 
-describe('Confirm valid object', function () {
+describe('Confirm valid object', function() {
 
-    it('invalid should not throw', () => {
+    it('errorType "returnNull" should not throw', () => {
         const nullValidator = props.create({
             errorType: 'returnNull',
         });
@@ -29,7 +27,7 @@ describe('Confirm valid object', function () {
         expect(params).to.be.null;
     });
 
-    it('invalid error message should be invalid', () => {
+    it('errorType "throw" should throw', () => {
         const throwValidator = props.create({
             errorType: 'throw',
         });
@@ -48,13 +46,15 @@ describe('Confirm valid object', function () {
         }).to.throw(/Missing properties/);
     });
 
-    it('valid obj should be valid when error type is throw', () => {
+    it('errorType "throw" should throw when invalid', () => {
+        const throwValidator = props.create({
+            errorType: 'throw',
+        });
 
-        let validThrow;
-        try {
-            validThrow = props.validate({
+        expect(() => {
+            throwValidator.validate({
                 myString: 'string',
-                myNumber: '42',
+                myNumber: 'Pinkie Pie',
                 myArray: ['array'],
                 myTypedArray: [1, 2, 3],
                 myObject: {
@@ -73,14 +73,37 @@ describe('Confirm valid object', function () {
                 myTrue: 'boolean',
                 myFalse: 'boolean?'
             });
-        }
-        catch (err) {
-            console.error('err', err);
-            console.error('validThrow', validThrow);
-        }
+        }).to.throw(/Invalid value for: number/);
+    });
 
-        expect(validThrow).to.not.be.null;
-        expect(validThrow).to.not.be.undefined;
+    it('errorType "returnNull" should return null', () => {
+        const nullValidator = props.create({
+            errorType: 'returnNull',
+        });
+
+        const params = nullValidator.validate({
+            myString: 'string',
+            myNumber: '42',
+            myArray: ['array'],
+            myTypedArray: [1, 42, 3],
+            myObject: {
+                foo: 'bar'
+            },
+            myDate: new Date(),
+            myTrue: 'Apple Jack',
+            myFalse: false,
+        }, {
+            myString: 'string',
+            myNumber: 'number?',
+            myArray: 'array',
+            myTypedArray: '[number]',
+            myObject: 'object',
+            myDate: 'date',
+            myTrue: 'boolean',
+            myFalse: 'boolean?'
+        });
+
+        expect(params).to.be.null;
     });
 
 });

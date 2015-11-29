@@ -2,75 +2,73 @@
 
 /* jshint -W030 */
 
-const props = require('../').create({
-        errorType: 'returnNull'
-    }),
+const props = require('../'),
     expect = require('chai').expect,
     raw = require('./raw');
 
-describe('Confirm invalid object', function () {
+describe('Confirm invalid object', function() {
 
-    const invalidString = props.validate(raw.invalidString, {
-        myString: 'string'
+    it('Invalid string should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidString, {
+                myString: 'string'
+            });
+        }).to.throw(/Invalid value for: string/);
     });
 
-    const invalidNumber = props.validate(raw.invalidNumber, {
-        myNumber: 'number'
+    it('Invalid number should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidNumber, {
+                myNumber: 'number'
+            });
+        }).to.throw(/Invalid value for: number/);
     });
 
-    const invalidArray = props.validate(raw.invalidArray, {
-        myArray: 'array'
+    it('Invalid array should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidArray, {
+                myArray: 'array'
+            });
+        }).to.throw(/Invalid value for: array/);
     });
 
-    const invalidTypedArray = props.validate(raw.invalidTypedArray, {
-        myTypedArray: '[number]'
+    it('Invalid typed array should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidTypedArray, {
+                myTypedArray: '[number]'
+            });
+        }).to.throw(/Invalid value for: [number]/);
     });
 
-    const invalidObject = props.validate(raw.invalidObject, {
-        myObject: 'object'
+    it('Invalid object should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidObject, {
+                myObject: 'object'
+            });
+        }).to.throw(/Invalid value for: object/);
     });
 
-    const invalidDate = props.validate(raw.invalidDate, {
-        myDate: 'date'
+    it('Invalid date should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidDate, {
+                myDate: 'date'
+            });
+        }).to.throw(/Invalid value for: date/);
     });
 
-    const invalidTrue = props.validate(raw.invalidTrue, {
-        myTrue: 'boolean'
+    it('Invalid boolean should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidTrue, {
+                myTrue: 'boolean'
+            });
+        }).to.throw(/Invalid value for: boolean/);
     });
 
-    const invalidFalse = props.validate(raw.invalidFalse, {
-        myFalse: 'boolean'
-    });
-
-    it('invalidString should be null', function () {
-        expect(invalidString).to.be.null;
-    });
-
-    it('invalidNumber should be null', function () {
-        expect(invalidNumber).to.be.null;
-    });
-
-    it('invalidArray should be null', function () {
-        expect(invalidArray).to.be.null;
-    });
-
-    it('invalidTypedArray should be null', function () {
-        expect(invalidTypedArray).to.be.null;
-    });
-
-    it('invalidObject should be null', function () {
-        expect(invalidObject).to.be.null;
-    });
-
-    it('invalidDate should be null', function () {
-        expect(invalidDate).to.be.null;
-    });
-
-    it('invalidTrue should be null', function () {
-        expect(invalidTrue).to.be.null;
-    });
-
-    it('invalidFalse should be null', function () {
-        expect(invalidFalse).to.be.null;
+    it('Invalid boolean should throw', () => {
+        expect(() => {
+            props.validate(raw.invalidFalse, {
+                myFalse: 'boolean'
+            });
+        }).to.throw(/Invalid value for: boolean/);
     });
 });

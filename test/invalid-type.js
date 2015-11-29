@@ -1,34 +1,27 @@
 'use strict';
 
-var assert = require('assert'),
-    props = require('../').create({errorType: 'returnNull'}),
+const props = require('../'),
     expect = require('chai').expect,
     raw = require('./raw');
 
-describe('Invalid types should throw error', function () {
+describe('Invalid types should throw error', function() {
 
-    it('Invalid type should throw', function () {
-        try {
-            var valid = props.validate(raw.all, {
-                myString: 'invalid-type',
+    it('Invalid type should throw', () => {
+        expect(() => {
+            props.validate(raw.all, {
+                myString: 'pony',
             });
-        }
-        catch (err) {
-            expect(err.message).to.equal('Invalid type in schema: invalid-type');
-        }
+        }).to.throw(/Invalid type: pony/);
     });
 
-    it('Invalid double api optional should throw error', function () {
-        try {
-            var validTwo = props.validate(raw.all, {
+    it('Invalid double api optional should throw error', () => {
+        expect(() => {
+            props.validate(raw.all, {
                 myString: 'string',
             }, {
                 myNumber: 'number?'
             });
-        }
-        catch (err) {
-            expect(err.message).to.equal('Invalid type in schema: number?');
-        }
+        }).to.throw(/Invalid type: number?/);
     });
 
 });

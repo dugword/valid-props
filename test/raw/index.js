@@ -1,6 +1,6 @@
 'use strict';
 
-var self = module.exports;
+const self = module.exports;
 
 self.all = {
     myString: 'puppy',
@@ -59,17 +59,17 @@ self.invalidNumber = {
 };
 
 self.invalidArray = {
-    myObject: {
+    myArray: {
         spam: 'eggs'
     }
 };
 
 self.invalidTypedArray = {
-    myTypedArray: new Date()
+    myTypedArray: [new Date()],
 };
 
 self.invalidObject = {
-    myArray: ['who', 'what', 'where', 'when', 'why']
+    myObject: 'Flutter Shy',
 };
 
 self.invalidDate = {
