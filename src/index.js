@@ -40,15 +40,16 @@ function create(opts) {
 
     function validate(params, schema, optional) {
         try {
-            optional = optional || {};
-
             if (typeof schema === 'string') {
-                schema = schemas[schema].schema;
-                optional = schemas[schema].optionalSchema;
+                const schemaName = schema;
+                schema = schemas[schemaName].schema;
+                optional = schemas[schemaName].optionalSchema;
             }
 
+            optional = optional || {};
+
             // Move all optional properties to the optional object
-            Object.keys(schema).forEach(function(key) {
+            Object.keys(schema).forEach(function (key) {
                 if (typeof schema[key] === 'string' && schema[key].slice(-1) === '?') {
                     optional[key] = schema[key].slice(0, -1);
                     delete schema[key];
@@ -68,12 +69,12 @@ function create(opts) {
             const invalidOptionalParams = checkedOptionalParams.invalid;
 
             // Join the valid optional params to the valid required types
-            Object.keys(validOptionalParams).forEach(function(key) {
+            Object.keys(validOptionalParams).forEach(function (key) {
                 validParams[key] = validOptionalParams[key];
             });
 
             // Join the invalid optional params to the invalid required types
-            Object.keys(invalidOptionalParams).forEach(function(key) {
+            Object.keys(invalidOptionalParams).forEach(function (key) {
                 invalidParams[key] = invalidOptionalParams[key];
             });
 
@@ -93,7 +94,8 @@ function create(opts) {
             }
 
             return validParams;
-        } catch (err) {
+        }
+        catch (err) {
             if (errorType === 'returnNull') {
                 return null;
             }
@@ -113,9 +115,9 @@ function create(opts) {
         });
 
         // Replace all properties with getters, throw an error if not validated
-        Object.keys(object).forEach(function(key) {
+        Object.keys(object).forEach(function (key) {
             const property = object[key];
-            object.__defineGetter__(key, function() {
+            object.__defineGetter__(key, function () {
                 if (!this.__validated) {
                     throw new Error('This object has not been validated');
                 }
@@ -125,7 +127,7 @@ function create(opts) {
 
         // Validate the object and set the internal flag
         Object.defineProperty(object, 'validate', {
-            value: function(schema, optional) {
+            value: function (schema, optional) {
                 this.__validated = true;
                 return validate(object, schema, optional);
             },
@@ -151,6 +153,16 @@ function create(opts) {
     }
 
     function registerType(name, func) {
+        if (arguments.length === 1 && Array.isArray(arguments[0])) {
+            arguments[0].forEach(type => registerType(type));
+            return self;
+        }
+
+        if (arguments.length === 1 && arguments[0].name) {
+            name = arguments[0].name;
+            func = arguments[0];
+        }
+
         if (typeof func !== 'function' || func.length !== 1) {
             throw new Error(`Failed to register type ${name}`);
         }
@@ -161,7 +173,26 @@ function create(opts) {
     }
 
     function registerSchema(name, schema, optionalSchema) {
+        if (arguments.length === 1 && Array.isArray(arguments[0])) {
+            arguments[0].forEach(schema => registerSchema(schema));
+            return self;
+        }
+
+        if (arguments.length === 1 && arguments[0] !== null && typeof arguments[0] === 'object') {
+            name = arguments[0].name;
+            schema = arguments[0].schema;
+            optionalSchema = arguments[0].optionalSchema;
+        }
+
         if (typeof name !== 'string') {
+            throw new Error(`Failed to register schema: ${name}`);
+        }
+
+        if (typeof schema !== 'object' || schema === null) {
+            throw new Error(`Failed to register schema: ${name}`);
+        }
+
+        if (optionalSchema && typeof optionalSchema !== 'object') {
             throw new Error(`Failed to register schema: ${name}`);
         }
 

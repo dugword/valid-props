@@ -43,12 +43,13 @@ function create(opts) {
     function validate(params, schema, optional) {
         try {
             var _ret = (function () {
-                optional = optional || {};
-
                 if (typeof schema === 'string') {
-                    schema = schemas[schema].schema;
-                    optional = schemas[schema].optionalSchema;
+                    var schemaName = schema;
+                    schema = schemas[schemaName].schema;
+                    optional = schemas[schemaName].optionalSchema;
                 }
+
+                optional = optional || {};
 
                 // Move all optional properties to the optional object
                 Object.keys(schema).forEach(function (key) {
@@ -158,6 +159,18 @@ function create(opts) {
     }
 
     function registerType(name, func) {
+        if (arguments.length === 1 && Array.isArray(arguments[0])) {
+            arguments[0].forEach(function (type) {
+                return registerType(type);
+            });
+            return self;
+        }
+
+        if (arguments.length === 1 && arguments[0].name) {
+            name = arguments[0].name;
+            func = arguments[0];
+        }
+
         if (typeof func !== 'function' || func.length !== 1) {
             throw new Error('Failed to register type ' + name);
         }
@@ -168,7 +181,28 @@ function create(opts) {
     }
 
     function registerSchema(name, schema, optionalSchema) {
+        if (arguments.length === 1 && Array.isArray(arguments[0])) {
+            arguments[0].forEach(function (schema) {
+                return registerSchema(schema);
+            });
+            return self;
+        }
+
+        if (arguments.length === 1 && arguments[0] !== null && _typeof(arguments[0]) === 'object') {
+            name = arguments[0].name;
+            schema = arguments[0].schema;
+            optionalSchema = arguments[0].optionalSchema;
+        }
+
         if (typeof name !== 'string') {
+            throw new Error('Failed to register schema: ' + name);
+        }
+
+        if ((typeof schema === 'undefined' ? 'undefined' : _typeof(schema)) !== 'object' || schema === null) {
+            throw new Error('Failed to register schema: ' + name);
+        }
+
+        if (optionalSchema && (typeof optionalSchema === 'undefined' ? 'undefined' : _typeof(optionalSchema)) !== 'object') {
             throw new Error('Failed to register schema: ' + name);
         }
 

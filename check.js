@@ -3,7 +3,8 @@
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
 function checkPropertyType(typeName, value, types, opts) {
-    // TODO (Doug): Not checking types yet
+    if ((typeof typeName === 'undefined' ? 'undefined' : _typeof(typeName)) === 'object') {}
+
     var isArray = /\[(\w+)\]/.exec(typeName);
 
     if (isArray) {
@@ -24,8 +25,9 @@ function checkPropertyType(typeName, value, types, opts) {
             value.forEach(function (item) {
                 result.push(func(item));
             });
+        } else {
+            result = func(value);
         }
-        result = func(value);
     } catch (err) {
         throw new Error('Invalid value: ' + value + ' for type: ' + typeName);
     }
@@ -61,6 +63,14 @@ function checkPropertiesTypes(params, schema, types, opts) {
         // Don't check optional properties that don't exist
         if (!params.hasOwnProperty(propertyName)) {
             return;
+        }
+
+        if ((typeof typeName === 'undefined' ? 'undefined' : _typeof(typeName)) === 'object') {
+            var foo = checkPropertiesTypes(value, typeName, types, opts).valid;
+            valid[propertyName] = foo.valid;
+            if (foo.invalid.length) {
+                throw foo.invalid;
+            }
         }
 
         try {

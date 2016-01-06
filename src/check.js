@@ -1,7 +1,10 @@
 'use strict';
 
 function checkPropertyType(typeName, value, types, opts) {
-    // TODO (Doug): Not checking types yet
+    if (typeof typeName === 'object') {
+
+    }
+
     const isArray = /\[(\w+)\]/.exec(typeName);
 
     if (isArray) {
@@ -23,8 +26,11 @@ function checkPropertyType(typeName, value, types, opts) {
                 result.push(func(item));
             });
         }
-        result = func(value);
-    } catch (err) {
+        else {
+            result = func(value);
+        }
+    }
+    catch (err) {
         throw new Error(`Invalid value: ${value} for type: ${typeName}`);
     }
 
@@ -61,9 +67,18 @@ function checkPropertiesTypes(params, schema, types, opts) {
             return;
         }
 
+        if (typeof typeName === 'object') {
+            const foo = checkPropertiesTypes(value, typeName, types, opts).valid;
+            valid[propertyName] = foo.valid;
+            if (foo.invalid.length) {
+                throw foo.invalid;
+            }
+        }
+
         try {
             valid[propertyName] = checkPropertyType(typeName, value, types, opts);
-        } catch (err) {
+        }
+        catch (err) {
             invalid[propertyName] = err;
         }
     });
