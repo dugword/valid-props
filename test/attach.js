@@ -43,6 +43,7 @@ describe('Confirm valid object', function () {
     });
 
     it('valid.myTypedArray should be an array of numbers', () => {
+        console.dir(valid.myTypedArray);
         valid.myTypedArray.should.have.members([
             24,
             13,

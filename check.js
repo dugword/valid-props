@@ -13,7 +13,7 @@ function checkPropertyType(typeName, value, types, opts) {
 
     var func = typeof typeName === 'function' ? typeName : types[typeName];
 
-    var result = undefined;
+    var results = [];
 
     if (func === undefined) {
         throw new Error('Invalid type: ' + typeName);
@@ -21,33 +21,51 @@ function checkPropertyType(typeName, value, types, opts) {
 
     try {
         if (isArray) {
-            result = [];
             value.forEach(function (item) {
-                result.push(func(item));
+                results.push({
+                    originalValue: item,
+                    result: func(item)
+                });
             });
+            console.log("here");
+            console.dir(results);
         } else {
-            result = func(value);
+            results.push({
+                originalValue: value,
+                result: func(value)
+            });
         }
     } catch (err) {
         throw new Error('Invalid value: ' + value + ' for type: ' + typeName);
     }
 
-    if (result === undefined || result === false || result === null) {
-        throw new Error('Invalid value: ' + value + ' for type: ' + typeName);
-    }
-
-    if ((typeof result === 'undefined' ? 'undefined' : _typeof(result)) === 'object' && result.hasOwnProperty('valid')) {
-        if (result.valid) {
-            if (!opts.strict && result.newValue) {
-                return result.newValue;
-            }
-            return value;
+    var returnValues = results.map(function (result) {
+        console.log('\'ere');
+        console.dir(result);
+        if (result.result === undefined || result.result === false || result.result === null) {
+            throw new Error('Invalid value: ' + value + ' for type: ' + typeName);
         }
 
-        throw new Error('Invalid value for: ' + typeName);
-    }
+        if (_typeof(result.result) === 'object' && result.result.hasOwnProperty('valid')) {
+            if (result.result.valid) {
+                if (!opts.strict && result.result.newValue) {
+                    return result.result.newValue;
+                }
+                return result.originalValue;
+            }
 
-    return value;
+            throw new Error('Invalid value for: ' + typeName);
+        }
+
+        return result.originalValue;
+    });
+
+    if (isArray) {
+        console.log('there');
+        console.dir(returnValues);
+        return returnValues;
+    }
+    return returnValues.pop();
 }
 
 // Sets all properties to their clean value or null
