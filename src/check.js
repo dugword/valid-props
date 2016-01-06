@@ -27,8 +27,6 @@ function checkPropertyType(typeName, value, types, opts) {
                     result: func(item),
                 });
             });
-            console.log("here");
-            console.dir(results);
         }
         else {
             results.push({
@@ -42,8 +40,6 @@ function checkPropertyType(typeName, value, types, opts) {
     }
 
     const returnValues = results.map(result => {
-        console.log('\'ere');
-        console.dir(result);
         if (result.result === undefined || result.result === false || result.result === null) {
             throw new Error(`Invalid value: ${value} for type: ${typeName}`);
         }
@@ -63,8 +59,6 @@ function checkPropertyType(typeName, value, types, opts) {
     });
 
     if (isArray) {
-        console.log('there');
-        console.dir(returnValues);
         return returnValues;
     }
     return returnValues.pop();
