@@ -3,15 +3,33 @@
 function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
 function checkPropertyType(typeName, value, types, opts) {
-    if ((typeof typeName === 'undefined' ? 'undefined' : _typeof(typeName)) === 'object') {}
+    var isArray = undefined,
+        func = undefined;
+    // If RegExp literal is passed, convert to function
+    if (typeName instanceof RegExp) {
+        func = function regex(item) {
+            var rez = !typeName.test(item);
+            if (rez) {
+                return {
+                    valid: false
+                };
+            }
 
-    var isArray = /\[(\w+)\]/.exec(typeName);
+            return {
+                valid: true,
+                value: value.toString()
+            };
+        };
+    } else {
+        // Check for array syntax around type E.g. '[string]?'
+        isArray = /^\[(\w+)\]\??$/.exec(typeName);
 
-    if (isArray) {
-        typeName = isArray[1];
+        if (isArray) {
+            typeName = isArray[1];
+        }
+
+        func = typeof typeName === 'function' ? typeName : types[typeName];
     }
-
-    var func = typeof typeName === 'function' ? typeName : types[typeName];
 
     var results = [];
 
@@ -27,8 +45,6 @@ function checkPropertyType(typeName, value, types, opts) {
                     result: func(item)
                 });
             });
-            console.log("here");
-            console.dir(results);
         } else {
             results.push({
                 originalValue: value,
@@ -40,8 +56,6 @@ function checkPropertyType(typeName, value, types, opts) {
     }
 
     var returnValues = results.map(function (result) {
-        console.log('\'ere');
-        console.dir(result);
         if (result.result === undefined || result.result === false || result.result === null) {
             throw new Error('Invalid value: ' + value + ' for type: ' + typeName);
         }
@@ -54,15 +68,13 @@ function checkPropertyType(typeName, value, types, opts) {
                 return result.originalValue;
             }
 
-            throw new Error('Invalid value for: ' + typeName);
+            throw new Error('Invalid value: ' + result.originalValue + ' for type: ' + typeName);
         }
 
         return result.originalValue;
     });
 
     if (isArray) {
-        console.log('there');
-        console.dir(returnValues);
         return returnValues;
     }
     return returnValues.pop();
@@ -83,7 +95,8 @@ function checkPropertiesTypes(params, schema, types, opts) {
             return;
         }
 
-        if ((typeof typeName === 'undefined' ? 'undefined' : _typeof(typeName)) === 'object') {
+        // TODO (Doug) Add comments, I forgot why this is here
+        if ((typeof typeName === 'undefined' ? 'undefined' : _typeof(typeName)) === 'object' && !(typeName instanceof RegExp)) {
             var foo = checkPropertiesTypes(value, typeName, types, opts).valid;
             valid[propertyName] = foo.valid;
             if (foo.invalid.length) {

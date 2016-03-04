@@ -10,10 +10,11 @@ self.all = {
     myObject: {
         spam: 'eggs'
     },
-    myDate: new Date(),
+    myDate: new Date('1955-11-12'),
     myTrue: true,
     myFalse: false,
     myCustom: 'Twilight Sparkle',
+    myRegExp: 'Rarity loves gems!',
 };
 
 self.string = {
@@ -39,7 +40,7 @@ self.object = {
 };
 
 self.date = {
-    myDate: new Date()
+    myDate: new Date('1955-11-12'),
 };
 
 self.true = {
@@ -65,7 +66,7 @@ self.invalidArray = {
 };
 
 self.invalidTypedArray = {
-    myTypedArray: [new Date()],
+    myTypedArray: [new Date('1955-11-12')],
 };
 
 self.invalidObject = {
@@ -73,13 +74,21 @@ self.invalidObject = {
 };
 
 self.invalidDate = {
-    myDate: '13/13/13'
+    myDate: '13/13/13',
 };
 
 self.invalidTrue = {
-    myTrue: 'foo'
+    myTrue: 'foo',
 };
 
 self.invalidFalse = {
-    myFalse: -1
+    myFalse: -1,
+};
+
+self.invalidCustom = {
+    myCustom: 'Bulbasaur',
+};
+
+self.invalidRegExp = {
+    myRegExp: 'Pikachu',
 };

@@ -73,7 +73,7 @@ describe('Confirm valid object', function() {
                 myTrue: 'boolean',
                 myFalse: 'boolean?'
             });
-        }).to.throw(/Invalid value for: number/);
+        }).to.throw(/Invalid value: Pinkie Pie for type: number/);
     });
 
     it('errorType "returnNull" should return null', () => {

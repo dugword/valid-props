@@ -1,17 +1,33 @@
 'use strict';
 
 function checkPropertyType(typeName, value, types, opts) {
-    if (typeof typeName === 'object') {
+    let isArray, func;
+    // If RegExp literal is passed, convert to function
+    if (typeName instanceof RegExp) {
+        func = function regex(item) {
+            let rez = !typeName.test(item);
+            if (rez) {
+                return {
+                    valid: false,
+                };
+            }
 
+            return {
+                valid: true,
+                value: value.toString(),
+            };
+        };
     }
+    else {
+        // Check for array syntax around type E.g. '[string]?'
+        isArray = /^\[(\w+)\]\??$/.exec(typeName);
 
-    const isArray = /\[(\w+)\]/.exec(typeName);
+        if (isArray) {
+            typeName = isArray[1];
+        }
 
-    if (isArray) {
-        typeName = isArray[1];
+        func = typeof typeName === 'function' ? typeName : types[typeName];
     }
-
-    const func = typeof typeName === 'function' ? typeName : types[typeName];
 
     let results = [];
 
@@ -52,7 +68,7 @@ function checkPropertyType(typeName, value, types, opts) {
                 return result.originalValue;
             }
 
-            throw new Error(`Invalid value for: ${typeName}`);
+            throw new Error(`Invalid value: ${result.originalValue} for type: ${typeName}`);
         }
 
         return result.originalValue;
@@ -72,7 +88,7 @@ function checkPropertiesTypes(params, schema, types, opts) {
 
     Object.keys(schema).forEach(propertyName => {
 
-        const typeName = schema[propertyName],
+        let typeName = schema[propertyName],
             value = params[propertyName];
 
         // Don't check optional properties that don't exist
@@ -80,7 +96,8 @@ function checkPropertiesTypes(params, schema, types, opts) {
             return;
         }
 
-        if (typeof typeName === 'object') {
+        // TODO (Doug) Add comments, I forgot why this is here
+        if (typeof typeName === 'object' && !(typeName instanceof RegExp)) {
             const foo = checkPropertiesTypes(value, typeName, types, opts).valid;
             valid[propertyName] = foo.valid;
             if (foo.invalid.length) {

@@ -42,8 +42,14 @@ function create(opts) {
         try {
             if (typeof schema === 'string') {
                 const schemaName = schema;
+                // Check for invalid/unregistered schemas
+                if (!schemas.hasOwnProperty(schemaName)) {
+                    throw new Error(`No schema named ${schemaName} defined`);
+                }
+
                 schema = schemas[schemaName].schema;
                 optional = schemas[schemaName].optionalSchema;
+
             }
 
             optional = optional || {};

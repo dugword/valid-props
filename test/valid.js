@@ -23,6 +23,7 @@ describe('Confirm valid object', function() {
             myTrue: 'boolean',
             myFalse: 'boolean',
             myCustom: value => /twilight/i.test(value),
+            myRegExp: /^Rarity\s\w+\sgems/,
         });
     });
 
@@ -41,5 +42,9 @@ describe('Confirm valid object', function() {
     it('valid.myTrue should be true', () => valid.myTrue.should.be.true);
 
     it('valid.myFalse should be false', () => valid.myFalse.should.be.false);
+
+    it('valid.myCustom should be valid', () => valid.myCustom.should.be.a.string);
+
+    it('valid.myRegExp should be a string', () => valid.myRegExp.should.be.a.string);
 
 });

@@ -73,4 +73,19 @@ describe('Register schema', function () {
             lastPost: '04-20-2015'
         }, 'stats')).to.not.throw();
     });
+
+    it('Throw on invalid schema name', () => {
+        const validator = props.create().registerSchema({
+            name: 'easyToTypo',
+            schema: {
+                username: 'string',
+                password: 'string',
+            }
+        });
+
+        expect(() => validator.validate({
+            username: 'Rarity',
+            password: 'g3msz',
+        }, 'ez2Typo')).to.throw();
+    });
 });
