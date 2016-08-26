@@ -1,10 +1,11 @@
 'use strict';
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 function checkPropertyType(typeName, value, types, opts) {
-    var isArray = undefined,
-        func = undefined;
+    var isArray = void 0;
+    var func = void 0;
+
     // If RegExp literal is passed, convert to function
     if (typeName instanceof RegExp) {
         func = function regex(item) {
@@ -81,9 +82,9 @@ function checkPropertyType(typeName, value, types, opts) {
 }
 
 // Sets all properties to their clean value or null
-function checkPropertiesTypes(params, schema, types, opts) {
-    var valid = {},
-        invalid = {};
+function checkPropertiesTypes(params, schema, types, opts, valid, invalid) {
+    valid = valid || {};
+    invalid = invalid || {};
 
     Object.keys(schema).forEach(function (propertyName) {
 
@@ -95,19 +96,18 @@ function checkPropertiesTypes(params, schema, types, opts) {
             return;
         }
 
-        // TODO (Doug) Add comments, I forgot why this is here
-        if ((typeof typeName === 'undefined' ? 'undefined' : _typeof(typeName)) === 'object' && !(typeName instanceof RegExp)) {
-            var foo = checkPropertiesTypes(value, typeName, types, opts).valid;
-            valid[propertyName] = foo.valid;
-            if (foo.invalid.length) {
-                throw foo.invalid;
-            }
-        }
+        // Check nested objects
+        if ((typeof typeName === 'undefined' ? 'undefined' : _typeof(typeName)) === 'object' && !(typeName instanceof RegExp) && !Array.isArray(typeName)) {
+            valid[propertyName] = {};
+            invalid[propertyName] = {};
 
-        try {
-            valid[propertyName] = checkPropertyType(typeName, value, types, opts);
-        } catch (err) {
-            invalid[propertyName] = err;
+            checkPropertiesTypes(value, typeName, types, opts, valid[propertyName], invalid[propertyName]);
+        } else {
+            try {
+                valid[propertyName] = checkPropertyType(typeName, value, types, opts);
+            } catch (err) {
+                invalid[propertyName] = err;
+            }
         }
     });
 

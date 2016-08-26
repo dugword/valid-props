@@ -15,6 +15,14 @@ self.all = {
     myFalse: false,
     myCustom: 'Twilight Sparkle',
     myRegExp: 'Rarity loves gems!',
+    myNestedObject: {
+        myNestedString: 'pony',
+        myNestedNumber: 24,
+        myDoubleNestedObject: {
+            myDoubleNestedString: 'string',
+            myDoubleNestedNumber: 13,
+        }
+    },
 };
 
 self.string = {

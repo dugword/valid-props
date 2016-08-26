@@ -1,10 +1,24 @@
 'use strict';
 
-function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var standardTypes = require('./standard-types'),
     check = require('./check'),
     verify = require('./verify');
+
+function checkInvalidResults(invalidParams, errors) {
+    errors = errors || [];
+    Object.keys(invalidParams).forEach(function (propertyName) {
+        var value = invalidParams[propertyName];
+        if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !(value instanceof Error)) {
+            return checkInvalidResults(value, errors);
+        } else {
+            errors.push(value);
+        }
+    });
+
+    return errors;
+}
 
 function create(opts) {
     var self = {
@@ -42,7 +56,7 @@ function create(opts) {
 
     function validate(params, schema, optional) {
         try {
-            var _ret = (function () {
+            var _ret = function () {
                 if (typeof schema === 'string') {
                     var schemaName = schema;
                     // Check for invalid/unregistered schemas
@@ -86,14 +100,10 @@ function create(opts) {
                     invalidParams[key] = invalidOptionalParams[key];
                 });
 
-                if (Object.keys(invalidParams).length) {
-                    var errorMessage = undefined;
-
-                    Object.keys(invalidParams).forEach(function (propertyName) {
-                        errorMessage += invalidParams[propertyName] + '\n';
-                    });
-
-                    throw new Error(errorMessage);
+                // Throws if any non-empty objects exist
+                var errors = checkInvalidResults(invalidParams);
+                if (errors.length) {
+                    throw new Error(errors.join('\n'));
                 }
 
                 // TODO: This was a bugfix, needs a test
@@ -104,7 +114,7 @@ function create(opts) {
                 return {
                     v: validParams
                 };
-            })();
+            }();
 
             if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
         } catch (err) {

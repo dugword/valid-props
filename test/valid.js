@@ -24,6 +24,14 @@ describe('Confirm valid object', function() {
             myFalse: 'boolean',
             myCustom: value => /twilight/i.test(value),
             myRegExp: /^Rarity\s\w+\sgems/,
+            myNestedObject: {
+                myNestedString: 'string',
+                myNestedNumber: 'number',
+                myDoubleNestedObject: {
+                    myDoubleNestedString: 'string',
+                    myDoubleNestedNumber: 'number',
+                },
+            },
         });
     });
 
@@ -46,5 +54,6 @@ describe('Confirm valid object', function() {
     it('valid.myCustom should be valid', () => valid.myCustom.should.be.a.string);
 
     it('valid.myRegExp should be a string', () => valid.myRegExp.should.be.a.string);
+    it('valid.myNestedObject should have keys', () => valid.myNestedObject.should.have.keys(['myNestedString', 'myNestedNumber', 'myDoubleNestedObject']));
 
 });

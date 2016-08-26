@@ -4,6 +4,21 @@ const standardTypes = require('./standard-types'),
     check = require('./check'),
     verify = require('./verify');
 
+function checkInvalidResults(invalidParams, errors) {
+    errors = errors || [];
+    Object.keys(invalidParams).forEach(propertyName => {
+        const value = invalidParams[propertyName];
+        if (typeof value === 'object' && !(value instanceof Error)) {
+            return checkInvalidResults(value, errors);
+        }
+        else {
+            errors.push(value);
+        }
+    });
+
+    return errors;
+}
+
 function create(opts) {
     const self = {
         attach,
@@ -55,7 +70,7 @@ function create(opts) {
             optional = optional || {};
 
             // Move all optional properties to the optional object
-            Object.keys(schema).forEach(function (key) {
+            Object.keys(schema).forEach(function(key) {
                 if (typeof schema[key] === 'string' && schema[key].slice(-1) === '?') {
                     optional[key] = schema[key].slice(0, -1);
                     delete schema[key];
@@ -75,23 +90,19 @@ function create(opts) {
             const invalidOptionalParams = checkedOptionalParams.invalid;
 
             // Join the valid optional params to the valid required types
-            Object.keys(validOptionalParams).forEach(function (key) {
+            Object.keys(validOptionalParams).forEach(function(key) {
                 validParams[key] = validOptionalParams[key];
             });
 
             // Join the invalid optional params to the invalid required types
-            Object.keys(invalidOptionalParams).forEach(function (key) {
+            Object.keys(invalidOptionalParams).forEach(function(key) {
                 invalidParams[key] = invalidOptionalParams[key];
             });
 
-            if (Object.keys(invalidParams).length) {
-                let errorMessage;
-
-                Object.keys(invalidParams).forEach(propertyName => {
-                    errorMessage += invalidParams[propertyName] + '\n';
-                });
-
-                throw new Error(errorMessage);
+            // Throws if any non-empty objects exist
+            const errors = checkInvalidResults(invalidParams);
+            if (errors.length) {
+                throw new Error(errors.join('\n'));
             }
 
             // TODO: This was a bugfix, needs a test
@@ -100,8 +111,7 @@ function create(opts) {
             }
 
             return validParams;
-        }
-        catch (err) {
+        } catch (err) {
             if (errorType === 'returnNull') {
                 return null;
             }
@@ -121,9 +131,9 @@ function create(opts) {
         });
 
         // Replace all properties with getters, throw an error if not validated
-        Object.keys(object).forEach(function (key) {
+        Object.keys(object).forEach(function(key) {
             const property = object[key];
-            object.__defineGetter__(key, function () {
+            object.__defineGetter__(key, function() {
                 if (!this.__validated) {
                     throw new Error('This object has not been validated');
                 }
@@ -133,7 +143,7 @@ function create(opts) {
 
         // Validate the object and set the internal flag
         Object.defineProperty(object, 'validate', {
-            value: function (schema, optional) {
+            value: function(schema, optional) {
                 this.__validated = true;
                 return validate(object, schema, optional);
             },
