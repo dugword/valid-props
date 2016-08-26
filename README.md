@@ -106,6 +106,10 @@ and returns a function that will validate objects against that schema.
             stats: '[string]', // An array of strings
             foo: 'array',
             bar: 'object',
+            nestedObject: {
+                rank: 'string',
+                level: 'number',
+            },
             blerg: 'string?', // Trailing '?' for optional properties
         }, {
             baz: 'boolean' // Or pass a second optional schema,
