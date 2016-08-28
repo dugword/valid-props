@@ -1,12 +1,12 @@
+[![bitHound Overall Score](https://www.bithound.io/github/dugword/valid-props/badges/score.svg)](https://www.bithound.io/github/dugword/valid-props)
+[![npm version](https://badge.fury.io/js/valid-props.svg)](https://badge.fury.io/js/valid-props)
+
 ![valid-props logo](/images/logo.png) valid-props
 ===========
 
 The ultra lightweight, dependency free, flexible, extensible, object property
 validator with a simple succinct interface that runs in any ES5 compatible
 environment.
-
-## VERSION
-2.0.0
 
 ## CHANGES
 In addition to new features, version 2.0.0 changes the default API to reject
@@ -91,129 +91,138 @@ will just work when passed into this method.
 The 'createSchemaValidator` accepts a schema object and optional schema object,
 and returns a function that will validate objects against that schema.
 
-## EXAMPLE
+## EXAMPLES
 
-    // Example 1: Static method call
-    var props = require('valid-props');
+#### Example 1: Static method call
+```javascript
+var props = require('valid-props');
 
-    function someRoute(req, res) {
+function someRoute(req, res) {
 
-        var params = props.validate(req.body, {
-            username: 'string',
-            password: 'string',
-            age: 'number',
-            birthday: 'date',  // Casts valid dates to a new Date() object
-            stats: '[string]', // An array of strings
-            foo: 'array',
-            bar: 'object',
-            nestedObject: {
-                rank: 'string',
-                level: 'number',
-            },
-            blerg: 'string?', // Trailing '?' for optional properties
-        }, {
-            baz: 'boolean' // Or pass a second optional schema,
-        });
-
-        if (params === null) {
-            return res.send('Error: Invalid request parameters');
-        }
-
-        res.send('Success: A valid request was sent');
-    }
-
-    // Example 2: Attached method call
-    var props = require('valid-props');
-
-    function crashAppRoute(req, res) {
-        props.attach(req.body);
-
-        if (req.body.username === 'admin') { // THROWS ERROR
-            return res.render('admin.jade');
-        }
-
-        res.send('user.jade');
-    }
-
-    function workingAppRoute(req, res) {
-        props.attach(req.body);
-
-        var params = req.body.validate({     // Clears flag preventing access
-            username: 'string',
-        });
-
-        if (params.username === 'admin') {
-            return res.render('admin.jade');
-        }
-
-        res.send('user.jade');
-    }
-
-    // Example 3: Create a new isolated instance with a different error type
-    var props = require('valid-props'),
-        validator = props.create({ errorType: 'throw' });
-
-    var invalidParamsNull = props.validate({bar: 'bar'}, {
-    	foo: 'string',
+    var params = props.validate(req.body, {
+        username: 'string',
+        password: 'string',
+        age: 'number',
+        birthday: 'date',  // Casts valid dates to a new Date() object
+        stats: '[string]', // An array of strings
+        foo: 'array',
+        bar: 'object',
+        nestedObject: {
+            rank: 'string',
+            level: 'number',
+        },
+        blerg: 'string?', // Trailing '?' for optional properties
+    }, {
+        baz: 'boolean' // Or pass a second optional schema,
     });
 
-    if (invalidParamsNull === null) {
-        console.log('This value is ', invalidParamsNull); // 'This value is null'
+    if (params === null) {
+        return res.send('Error: Invalid request parameters');
     }
 
-    try {
-        var invalidParamsThrow = validator.validate({bar: 'bar'}, {
-            foo: 'string',
-        });
-    }
-    catch (e) {
-        console.error(e.message); // 'Missing properties: foo'
+    res.send('Success: A valid request was sent');
+}
+```
+
+#### Example 2: Attached method call
+
+```javascript
+var props = require('valid-props');
+
+function crashAppRoute(req, res) {
+    props.attach(req.body);
+
+    if (req.body.username === 'admin') { // THROWS ERROR
+        return res.render('admin.jade');
     }
 
-    // Example 4: Create a new isolated instance with updated behaviour
-    var validator = require('valid-props').create({
-        errorType: 'throw',
-        apiVersion: 1.5     // API Version 1.5 rejects empty arrays and objects
+    res.send('user.jade');
+}
+
+function workingAppRoute(req, res) {
+    props.attach(req.body);
+
+    var params = req.body.validate({     // Clears flag preventing access
+        username: 'string',
     });
 
-    try {
-        var invalid = validator.validate({bar: []}, {
-            foo: 'array'
-        });
-    }
-    catch (e) {
-        console.error(e.message); // 'Invalid type: array'
+    if (params.username === 'admin') {
+        return res.render('admin.jade');
     }
 
-    // Example 5: Create a new validator function for specific schemas
-    var schemaValidator = require('valid-props').createSchemaValidator({
-    	myString: 'string'
+    res.send('user.jade');
+}
+```
+
+#### Example 3: Create a new isolated instance with a different error type
+```javascript
+var props = require('valid-props'),
+    validator = props.create({ errorType: 'throw' });
+
+var invalidParamsNull = props.validate({bar: 'bar'}, {
+	foo: 'string',
+});
+
+if (invalidParamsNull === null) {
+    console.log('This value is ', invalidParamsNull); // 'This value is null'
+}
+
+try {
+    var invalidParamsThrow = validator.validate({bar: 'bar'}, {
+        foo: 'string',
     });
+}
+catch (e) {
+    console.error(e.message); // 'Missing properties: foo'
+}
+```
 
-    try {
-        var valid = schemaValidator({ myString: 'This is a string' });
-    }
-    catch (e) {
-        console.error(e.message); // Valid object, won't throw
-    }
+#### Example 4: Create a new isolated instance with updated behaviour
 
+```javascript
+var validator = require('valid-props').create({
+    errorType: 'throw',
+    apiVersion: 1.5     // API Version 1.5 rejects empty arrays and objects
+});
+
+try {
+    var invalid = validator.validate({bar: []}, {
+        foo: 'array'
+    });
+}
+catch (e) {
+    console.error(e.message); // 'Invalid type: array'
+}
+
+// Example 5: Create a new validator function for specific schemas
+var schemaValidator = require('valid-props').createSchemaValidator({
+	myString: 'string'
+});
+
+try {
+    var valid = schemaValidator({ myString: 'This is a string' });
+}
+catch (e) {
+    console.error(e.message); // Valid object, won't throw
+}
+```
 
 # TYPES
-- string
+- `string`
   - All types will be coerced to a string by calling their `toString()` method
-- number
+- `number`
   - Coerces strings that look like numbers
-- int
+- `int`
   - Coerces strings that look like numbers
   - Floors decimal values to integers
-- array
-- function
-- object
-- boolean
+- `array`
+- `function`
+- `object`
+- `boolean`
   - Coerces strings that look like boolean values
-- typed array (Supports any other type)
+- `typed array` (Supports any other type)
   - Will coerce the type specified
-- Date (JavaScript Date object)
+- `Date` (JavaScript Date object)
   - Coerces strings that look like dates
 
 # ES2015
