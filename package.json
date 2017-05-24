@@ -1,6 +1,6 @@
 {
   "name": "valid-props",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Validates an objects properties",
   "main": "index.js",
   "scripts": {
