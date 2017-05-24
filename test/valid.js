@@ -57,3 +57,13 @@ describe('Confirm valid object', function() {
     it('valid.myNestedObject should have keys', () => valid.myNestedObject.should.have.keys(['myNestedString', 'myNestedNumber', 'myDoubleNestedObject']));
 
 });
+
+describe('Confirm empty valid object', function() {
+
+  const valid = props.validate({}, {});
+  it('Empty object should validate against empty schema', function() {
+    valid.should.be.an.object;
+    valid.should.be.empty;
+  });
+
+});

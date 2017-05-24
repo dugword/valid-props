@@ -2,6 +2,8 @@
 
 const self = module.exports;
 
+self.empty = {};
+
 self.all = {
     myString: 'puppy',
     myNumber: 42,

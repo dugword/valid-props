@@ -105,11 +105,6 @@ function create(opts) {
                 throw new Error(errors.join('\n'));
             }
 
-            // TODO: This was a bugfix, needs a test
-            if (Object.keys(validParams).length === 0) {
-                throw new Error('No valid properties');
-            }
-
             return validParams;
         } catch (err) {
             if (errorType === 'returnNull') {
