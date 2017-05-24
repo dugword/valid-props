@@ -160,3 +160,38 @@ describe('Confirm optional syntax', function () {
         expect(validOptional).to.not.be.null;
     });
 });
+
+describe('Confirm optional only object', function () {
+
+    const valid = props.validate(raw.empty, {}, {
+        myString: 'string',
+        myNumber: 'number',
+        myArray: 'array',
+        myTypedArray: '[number]',
+        myObject: 'object',
+        myDate: 'date',
+        myTrue: 'boolean',
+        myFalse: 'boolean'
+    });
+
+    const validOptional = props.validate(raw.empty, {
+        myString: 'string?',
+        myNumber: 'number?',
+        myArray: 'array?',
+        myTypedArray: '[number]?',
+        myObject: 'object?',
+        myDate: 'date?',
+        myTrue: 'boolean?',
+        myFalse: 'boolean?'
+    });
+
+    it('valid should be an empty object', function () {
+        expect(valid).to.be.an.object;
+        expect(valid).to.be.empty;
+    });
+
+    it('validOptional should be an empty object', function () {
+        expect(valid).to.be.an.object;
+        expect(valid).to.be.empty;
+    });
+});

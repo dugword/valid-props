@@ -1,6 +1,6 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var standardTypes = require('./standard-types'),
     check = require('./check'),
@@ -56,67 +56,63 @@ function create(opts) {
 
     function validate(params, schema, optional) {
         try {
-            var _ret = function () {
-                if (typeof schema === 'string') {
-                    var schemaName = schema;
-                    // Check for invalid/unregistered schemas
-                    if (!schemas.hasOwnProperty(schemaName)) {
-                        throw new Error('No schema named ' + schemaName + ' defined');
-                    }
-
-                    schema = schemas[schemaName].schema;
-                    optional = schemas[schemaName].optionalSchema;
+            if (typeof schema === 'string') {
+                var schemaName = schema;
+                // Check for invalid/unregistered schemas
+                if (!schemas.hasOwnProperty(schemaName)) {
+                    throw new Error('No schema named ' + schemaName + ' defined');
                 }
 
-                optional = optional || {};
+                schema = schemas[schemaName].schema;
+                optional = schemas[schemaName].optionalSchema;
+            }
 
-                // Move all optional properties to the optional object
-                Object.keys(schema).forEach(function (key) {
-                    if (typeof schema[key] === 'string' && schema[key].slice(-1) === '?') {
-                        optional[key] = schema[key].slice(0, -1);
-                        delete schema[key];
-                    }
-                });
+            optional = optional || {};
 
-                verify.propertiesExist(params, schema);
-
-                // Check that every required property is of the required type
-                var checkedParams = check.propertiesTypes(params, schema, types, opts);
-                var validParams = checkedParams.valid;
-                var invalidParams = checkedParams.invalid;
-
-                // Check that every optional request is of the required type
-                var checkedOptionalParams = check.propertiesTypes(params, optional, types, opts);
-                var validOptionalParams = checkedOptionalParams.valid;
-                var invalidOptionalParams = checkedOptionalParams.invalid;
-
-                // Join the valid optional params to the valid required types
-                Object.keys(validOptionalParams).forEach(function (key) {
-                    validParams[key] = validOptionalParams[key];
-                });
-
-                // Join the invalid optional params to the invalid required types
-                Object.keys(invalidOptionalParams).forEach(function (key) {
-                    invalidParams[key] = invalidOptionalParams[key];
-                });
-
-                // Throws if any non-empty objects exist
-                var errors = checkInvalidResults(invalidParams);
-                if (errors.length) {
-                    throw new Error(errors.join('\n'));
+            // Move all optional properties to the optional object
+            Object.keys(schema).forEach(function (key) {
+                if (typeof schema[key] === 'string' && schema[key].slice(-1) === '?') {
+                    optional[key] = schema[key].slice(0, -1);
+                    delete schema[key];
                 }
+            });
 
-                // TODO: This was a bugfix, needs a test
-                if (Object.keys(validParams).length === 0) {
-                    throw new Error('No valid properties');
-                }
+            verify.propertiesExist(params, schema);
 
-                return {
-                    v: validParams
-                };
-            }();
+            // Check that every required property is of the required type
+            var checkedParams = check.propertiesTypes(params, schema, types, opts);
+            var validParams = checkedParams.valid;
+            var invalidParams = checkedParams.invalid;
 
-            if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+            // Check that every optional request is of the required type
+            var checkedOptionalParams = check.propertiesTypes(params, optional, types, opts);
+            var validOptionalParams = checkedOptionalParams.valid;
+            var invalidOptionalParams = checkedOptionalParams.invalid;
+
+            // Join the valid optional params to the valid required types
+            Object.keys(validOptionalParams).forEach(function (key) {
+                validParams[key] = validOptionalParams[key];
+            });
+
+            // Join the invalid optional params to the invalid required types
+            Object.keys(invalidOptionalParams).forEach(function (key) {
+                invalidParams[key] = invalidOptionalParams[key];
+            });
+
+            // Throws if any non-empty objects exist
+            var errors = checkInvalidResults(invalidParams);
+            if (errors.length) {
+                throw new Error(errors.join('\n'));
+            }
+
+            /*
+            // TODO: This was a bugfix, needs a test
+            if (Object.keys(validParams).length === 0) {
+                throw new Error('No valid properties');
+            }
+             */
+
+            return validParams;
         } catch (err) {
             if (errorType === 'returnNull') {
                 return null;
